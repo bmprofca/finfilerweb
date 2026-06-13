@@ -65,7 +65,7 @@ const MainLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-primary transition-colors duration-300">
       <Navbar
         toggleSidebar={toggleSidebar}
         isMobile={isMobile}

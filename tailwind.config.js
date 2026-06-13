@@ -1,11 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
+        primary: {
+          DEFAULT: 'var(--bg-primary)',
+          foreground: 'var(--text-primary)',
+        },
+        secondary: {
+          DEFAULT: 'var(--bg-secondary)',
+          foreground: 'var(--text-secondary)',
+        },
+        border: 'var(--border-color)',
+        nav: 'var(--nav-bg)',
+        sidebar: 'var(--sidebar-bg)',
         sage: {
           50: '#eef2ff',
           100: '#e0e7ff',
