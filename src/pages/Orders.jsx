@@ -74,7 +74,7 @@ export default function Orders() {
 
   return (
     <motion.div
-      className="mx-auto max-w-5xl py-6 sm:py-8 px-2 sm:px-4"
+      className="mx-auto max-w-8xl py-6 sm:py-8 px-2 sm:px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -120,11 +120,10 @@ export default function Orders() {
           <button
             key={tab}
             onClick={() => setActiveFilter(tab)}
-            className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-              activeFilter === tab
+            className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${activeFilter === tab
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             {tab}
           </button>

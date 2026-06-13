@@ -15,7 +15,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
   const currentPath = location.pathname;
 
   const menuItems = [
-    { icon: House, label: 'Dashboard', path: '/' },
+    { icon: House, label: 'Dashboard', path: '/home' },
     { icon: Sparkles, label: 'Services', path: '/services' },
     { icon: ClipboardList, label: 'Orders', path: '/orders' },
     { icon: FolderOpen, label: 'Documents', path: '/documents' },

@@ -41,7 +41,7 @@ export default function Documents() {
 
   return (
     <motion.div
-      className="mx-auto max-w-5xl py-6 sm:py-8 px-2 sm:px-4"
+      className="mx-auto max-w-8xl py-6 sm:py-8 px-2 sm:px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -94,11 +94,10 @@ export default function Documents() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeCategory === cat
+              className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${activeCategory === cat
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+                }`}
             >
               {cat}
             </button>
@@ -133,9 +132,8 @@ export default function Documents() {
                     <p className="text-sm font-semibold text-slate-800 truncate">{doc.name}</p>
                     <p className="text-xs text-slate-400">{doc.size} · {doc.uploaded} · <span className="text-indigo-500">{doc.category}</span></p>
                   </div>
-                  <span className={`hidden sm:inline-flex text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    doc.status === 'Verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                  }`}>{doc.status}</span>
+                  <span className={`hidden sm:inline-flex text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${doc.status === 'Verified' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                    }`}>{doc.status}</span>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="p-2 rounded-lg hover:bg-indigo-50 text-indigo-500 transition">
                       <Download size={15} />

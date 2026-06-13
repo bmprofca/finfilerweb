@@ -28,8 +28,8 @@ export default function Home() {
   }
 
   return (
-    <motion.div 
-      className="mx-auto max-w-5xl py-8 px-4"
+    <motion.div
+      className="mx-auto max-w-8xl py-8 px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -51,7 +51,7 @@ export default function Home() {
           </div>
           <p className="mt-4 font-display text-3xl font-bold text-slate-900">$3,240</p>
         </motion.div>
-        
+
         <motion.div whileHover={{ y: -5 }} className="relative overflow-hidden rounded-3xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white p-6 shadow-soft">
           <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-purple-100/50 blur-2xl"></div>
           <div className="flex items-center gap-3 text-purple-600">
@@ -87,7 +87,7 @@ export default function Home() {
               <p className="text-xs sm:text-sm text-slate-500">Please complete these to finalize your return</p>
             </div>
           </div>
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 sm:px-5 sm:py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition hover:bg-indigo-700 w-full sm:w-auto"
@@ -99,8 +99,8 @@ export default function Home() {
 
         <ul className="divide-y divide-slate-100">
           {tasks.map((task, index) => (
-            <motion.li 
-              key={task.id} 
+            <motion.li
+              key={task.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}

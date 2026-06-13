@@ -35,7 +35,7 @@ const itemVariants = {
 export default function FundsBusiness() {
   return (
     <motion.div
-      className="mx-auto max-w-5xl py-6 sm:py-8 px-2 sm:px-4"
+      className="mx-auto max-w-8xl py-6 sm:py-8 px-2 sm:px-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
