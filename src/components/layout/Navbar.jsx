@@ -108,13 +108,15 @@ const Navbar = ({
               {openDropdown && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(false)} />
-                  <div className="absolute right-0 mt-2 w-56 bg-nav rounded-xl shadow-xl border border-border overflow-hidden z-50">
+                  <div className="absolute right-0 mt-2 w-60 rounded-2xl shadow-2xl border border-border overflow-hidden z-50"
+                    style={{ background: 'linear-gradient(135deg, var(--color-nav) 0%, color-mix(in srgb, var(--color-nav) 92%, #6366f1) 100%)', backdropFilter: 'blur(16px)' }}>
+
                     {/* Mobile user info */}
-                    <div className="md:hidden p-4 border-b border-border bg-secondary flex items-center gap-3">
+                    <div className="md:hidden p-4 border-b border-border bg-secondary/60 flex items-center gap-3">
                       {user?.image ? (
-                        <img src={user.image} alt="Profile" className="w-10 h-10 rounded-lg object-cover" />
+                        <img src={user.image} alt="Profile" className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-500/30" />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
                           <span className="text-white font-bold uppercase">{user?.first_name ? user.first_name.charAt(0) : 'U'}</span>
                         </div>
                       )}
@@ -124,31 +126,40 @@ const Navbar = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => { setOpenDropdown(false); navigate('/profile'); }}
-                      className="w-full text-left px-4 py-3 text-sm text-primary-foreground hover:bg-secondary transition-colors flex items-center gap-3"
-                    >
-                      <User className="w-4 h-4 text-secondary-foreground" />
-                      My Profile
-                    </button>
+                    {/* Menu items */}
+                    <div className="p-1.5 space-y-0.5">
+                      <button
+                        onClick={() => { setOpenDropdown(false); navigate('/profile'); }}
+                        className="group w-full text-left px-3 py-2.5 text-sm font-medium text-secondary-foreground hover:text-primary-foreground hover:bg-indigo-500/10 rounded-xl transition-all duration-150 flex items-center gap-3 border border-transparent hover:border-indigo-500/20"
+                      >
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-secondary group-hover:bg-indigo-500/20 transition-colors">
+                          <User className="w-4 h-4 text-secondary-foreground group-hover:text-indigo-400 transition-colors" />
+                        </span>
+                        My Profile
+                      </button>
 
-                    <button
-                      onClick={() => { setOpenDropdown(false); navigate('/settings'); }}
-                      className="w-full text-left px-4 py-3 text-sm text-primary-foreground hover:bg-secondary transition-colors flex items-center gap-3"
-                    >
-                      <Settings className="w-4 h-4 text-secondary-foreground" />
-                      Settings
-                    </button>
+                      <button
+                        onClick={() => { setOpenDropdown(false); navigate('/settings'); }}
+                        className="group w-full text-left px-3 py-2.5 text-sm font-medium text-secondary-foreground hover:text-primary-foreground hover:bg-indigo-500/10 rounded-xl transition-all duration-150 flex items-center gap-3 border border-transparent hover:border-indigo-500/20"
+                      >
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-secondary group-hover:bg-indigo-500/20 transition-colors">
+                          <Settings className="w-4 h-4 text-secondary-foreground group-hover:text-indigo-400 transition-colors" />
+                        </span>
+                        Settings
+                      </button>
 
-                    <div className="border-t border-border my-1"></div>
+                      <div className="border-t border-border/60 my-1 mx-1"></div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-500/10 transition-colors flex items-center gap-3"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
+                      <button
+                        onClick={handleLogout}
+                        className="group w-full text-left px-3 py-2.5 text-sm font-medium text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-150 flex items-center gap-3 border border-transparent hover:border-red-500/20"
+                      >
+                        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-secondary group-hover:bg-red-500/15 transition-colors">
+                          <LogOut className="w-4 h-4 text-red-500 group-hover:text-red-400 transition-colors" />
+                        </span>
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
