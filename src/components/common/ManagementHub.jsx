@@ -113,7 +113,7 @@ export default function ManagementHub({
                         ? activeButtonStyles[accent] || activeButtonStyles.slate
                         : disabled
                           ? 'cursor-not-allowed border-border bg-secondary text-slate-400'
-                          : 'border-border bg-secondary text-secondary-foreground hover:border-slate-300 hover:bg-primary'
+                          : 'border-border bg-secondary text-secondary-foreground hover:border-border hover:bg-primary'
                     )}
                   >
                     {Icon && <Icon size={13} />}

@@ -88,12 +88,12 @@ export default function ManagementTable({
       ref={containerRef}
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      className={joinClasses('overflow-hidden rounded-xl bg-secondary w-full', cardClass, containerClassName, className)}
+      className={joinClasses('overflow-hidden rounded-xl bg-secondary w-full border border-border', cardClass, containerClassName, className)}
     >
       <div className={joinClasses('w-full overflow-x-auto', tableClassName)}>
         <table className="w-full text-left text-sm text-primary-foreground">
           {showHeader && (
-            <thead className={joinClasses('hidden sm:table-header-group bg-gradient-to-r from-gray-100 to-gray-200 text-xs uppercase text-secondary-foreground', headerClassName)}>
+            <thead className={joinClasses('hidden sm:table-header-group bg-primary text-xs uppercase text-secondary-foreground', headerClassName)}>
               <tr>
                 {visibleColumns.map((column) => (
                   <th
@@ -112,7 +112,7 @@ export default function ManagementTable({
             </thead>
           )}
 
-          <tbody className={joinClasses('divide-y divide-gray-100', bodyClassName)}>
+          <tbody className={joinClasses('divide-y divide-border', bodyClassName)}>
             {rows.map((row, index) => {
               const key = resolveRowKey(row, rowKey, index);
               const rowActions = typeof getActions === 'function' ? getActions(row, index) : actions;
