@@ -89,7 +89,6 @@ export default function Login() {
   const [direction, setDirection] = useState(1)
 
   const [mobile, setMobile] = useState('')
-  const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
 
   const [loading, setLoading] = useState(false)
@@ -126,13 +125,11 @@ export default function Login() {
   const handleSendOtp = async (e) => {
     e.preventDefault()
     if (!mobile.trim()) return showToast('Mobile number is required.')
-    if (!password) return showToast('Password is required.')
 
     setLoading(true)
     try {
       const res = await apiCall('/auth/login-send-otp', 'POST', {
         mobile: mobile.trim(),
-        password,
       })
 
       if (res.status === 200) {
@@ -141,7 +138,7 @@ export default function Login() {
         startResendTimer(30)
         showToast('OTP sent to your mobile number.', 'success')
       } else if (res.status === 401) {
-        showToast('Invalid credentials. Please check your mobile and password.')
+        showToast('Invalid credentials. Please check your mobile number.')
       } else {
         let msg = 'Something went wrong. Please try again.'
         try { const d = await res.json(); if (d?.detail || d?.message) msg = d.detail || d.message } catch (_) {}
@@ -163,7 +160,6 @@ export default function Login() {
     try {
       const res = await apiCall('/auth/login-verify-otp', 'POST', {
         mobile: mobile.trim(),
-        password,
         otp: otp.trim(),
       })
 
@@ -196,7 +192,7 @@ export default function Login() {
     if (resendTimer > 0) return
     setLoading(true)
     try {
-      const res = await apiCall('/auth/login-send-otp', 'POST', { mobile: mobile.trim(), password })
+      const res = await apiCall('/auth/login-send-otp', 'POST', { mobile: mobile.trim() })
       if (res.status === 200) {
         setOtp('')
         startResendTimer(30)
@@ -295,7 +291,7 @@ export default function Login() {
               {step === 1 ? (
                 <motion.div key="step1-heading" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit">
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-                  <p className="mt-1 text-sm text-slate-500">Enter your mobile and password to receive an OTP.</p>
+                  <p className="mt-1 text-sm text-slate-500">Enter your mobile number to receive an OTP.</p>
                 </motion.div>
               ) : (
                 <motion.div key="step2-heading" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit">
@@ -334,24 +330,6 @@ export default function Login() {
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
                       placeholder="9876543210"
-                      className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700">
-                      Password <span className="text-red-500">*</span>
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 transition-all focus-within:border-indigo-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-slate-300">
-                    <Lock size={16} className="text-slate-400 flex-shrink-0" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
                       className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                     />
                   </div>

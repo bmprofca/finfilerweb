@@ -22,11 +22,10 @@ const Navbar = ({
   const [openDropdown, setOpenDropdown] = useState(false);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await apiCall("/auth/logout", "POST");
+      const response = await apiCall("/accounts/logout", "POST");
       if (response && !response.ok) {
         console.error("Logout API call failed with status:", response.status);
       }
