@@ -297,7 +297,7 @@ export default function Landing() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
               <ShieldCheck size={15} />
             </div>
-            <span className="font-bold text-slate-900">fin<span className="text-indigo-600 font-light">filer</span></span>
+            <span className="font-bold text-slate-900">Fin<span className="text-indigo-600 font-light">Filer</span></span>
           </div>
           <p className="text-xs text-slate-400">© 2025 finfiler. All rights reserved. IRS Authorized E-file Provider.</p>
           <div className="flex gap-5 text-xs text-slate-500">

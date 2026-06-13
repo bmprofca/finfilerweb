@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, User, ArrowRight, ShieldCheck, Clock, CheckCircle2, Phone, Loader2, ChevronLeft, RotateCcw } from 'lucide-react'
+import { Mail, User, ArrowRight, ShieldCheck, Clock, CheckCircle2, Phone, Loader2, ChevronLeft, RotateCcw, TrendingUp, Users, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiCall } from '../utils/apiCall'
 import { useToast } from '../contexts/ToastContext'
@@ -149,7 +149,7 @@ export default function Register() {
         try {
           const data = await response.json()
           if (data?.detail || data?.message) errMsg = data.detail || data.message
-        } catch (_) {}
+        } catch (_) { }
         showToast(errMsg)
       }
     } catch (err) {
@@ -182,13 +182,13 @@ export default function Register() {
           if (body.success && body.data) {
             login(body.data)
           }
-        } catch (_) {}
+        } catch (_) { }
 
         showToast('Account created successfully! Redirecting…', 'success')
         setTimeout(() => navigate('/home'), 1500)
       } else {
         let msg = 'Registration failed. Please check OTP and try again.'
-        try { const d = await response.json(); if (d?.detail || d?.message) msg = d.detail || d.message } catch (_) {}
+        try { const d = await response.json(); if (d?.detail || d?.message) msg = d.detail || d.message } catch (_) { }
         showToast(msg)
       }
     } catch {
@@ -227,48 +227,106 @@ export default function Register() {
   return (
     <div className="flex h-screen overflow-hidden bg-secondary">
 
-      {/* ── Left: Visual Panel ── */}
-      <div className="hidden lg:flex w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center flex-shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-500 rounded-full mix-blend-screen filter blur-[120px] opacity-30 animate-blob" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob" />
+      {/* ── Left: Brand Panel ── */}
+      <div className="hidden lg:flex w-1/2 relative overflow-hidden items-center justify-center flex-shrink-0"
+        style={{ background: 'linear-gradient(145deg, #0a0f1e 0%, #0d1635 40%, #111827 100%)' }}>
 
-        <div className="relative z-10 w-full max-w-sm px-8">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Fast &amp; Secure Filing</h2>
-            <p className="text-indigo-200 text-sm">Join thousands organizing their tax life effortlessly.</p>
+        {/* Dot grid texture */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+          backgroundSize: '28px 28px'
+        }} />
+
+        {/* Glowing orbs */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.32) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 60%)' }} />
+
+        {/* Content */}
+        <div className="relative z-10 w-full px-10 flex flex-col gap-8">
+
+          {/* Brand */}
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-500/40">
+                <ShieldCheck size={20} className="text-white" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-white">Fin<span className="text-indigo-400 font-light">Filer</span></span>
+            </div>
+            <h2 className="text-3xl font-bold text-white leading-snug">
+              Fast, secure,<br />
+              <span className="text-indigo-400">effortless filing.</span>
+            </h2>
+            <p className="mt-3 text-sm text-slate-400 leading-relaxed">
+              Join 50,000+ clients who trust FinFiler for expert tax filing, maximum refunds, and IRS compliance.
+            </p>
           </motion.div>
 
-          <div className="space-y-4">
-            <motion.div variants={float1} animate="animate"
-              className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl shadow-2xl">
+          {/* Floating cards */}
+          <div className="space-y-3">
+            {/* Card 1 — Security */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="rounded-2xl p-4 border border-white/8 backdrop-blur-xl"
+              style={{ background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+            >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
-                  <ShieldCheck size={18} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(99,102,241,0.2)' }}>
+                  <ShieldCheck size={17} className="text-indigo-400" />
                 </div>
                 <div>
                   <p className="text-white font-semibold text-sm">Bank-level Security</p>
-                  <p className="text-xs text-indigo-200">256-bit AES encryption</p>
+                  <p className="text-[11px] text-slate-400">256-bit AES encryption · IRS certified</p>
                 </div>
+                <span className="ml-auto text-[10px] font-semibold bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full">Verified</span>
               </div>
             </motion.div>
 
-            <motion.div variants={float2} animate="animate"
-              className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl shadow-2xl">
-              <div className="flex items-center gap-3 mb-3">
-                <Clock size={18} className="text-indigo-300" />
-                <p className="text-sm text-indigo-100">Average filing time</p>
+            {/* Card 2 — Speed */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+              className="rounded-2xl p-4 border border-white/8 backdrop-blur-xl"
+              style={{ background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(245,158,11,0.15)' }}>
+                  <Clock size={17} className="text-amber-400" />
+                </div>
+                <p className="text-[11px] font-medium text-amber-400 tracking-wide uppercase">Average filing time</p>
               </div>
               <div className="flex items-end gap-2">
-                <p className="text-4xl font-bold text-white">15</p>
-                <p className="text-indigo-200 mb-1 text-sm">mins</p>
+                <p className="text-4xl font-bold text-white tracking-tight">15</p>
+                <p className="text-slate-400 mb-1 text-sm">mins</p>
               </div>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
-                <CheckCircle2 size={14} className="text-emerald-400" />
-                <p className="text-xs text-emerald-400 font-medium">100% Accuracy Guarantee</p>
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/8">
+                <CheckCircle2 size={13} className="text-emerald-400" />
+                <p className="text-[11px] text-emerald-400 font-medium">100% Accuracy Guarantee</p>
               </div>
             </motion.div>
           </div>
+
+          {/* Trust stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
+            className="grid grid-cols-3 gap-3 border-t border-white/8 pt-6"
+          >
+            {[{ icon: <Users size={14} />, val: '50K+', label: 'Clients' },
+              { icon: <TrendingUp size={14} />, val: '$2.1B', label: 'Refunds' },
+              { icon: <Star size={14} />, val: '4.9★', label: 'Rating' }].map(({ icon, val, label }) => (
+              <div key={label} className="flex flex-col items-center gap-1">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: 'rgba(99,102,241,0.15)' }}>
+                  <span className="text-indigo-400">{icon}</span>
+                </div>
+                <p className="text-sm font-bold text-white">{val}</p>
+                <p className="text-[11px] text-slate-500">{label}</p>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
 
@@ -279,14 +337,14 @@ export default function Register() {
           {/* Logo */}
           <motion.div variants={itemVariants} className="mb-5">
             <Link to="/" className="flex items-center gap-2 mb-5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200">
-                <ShieldCheck size={18} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200">
+                <ShieldCheck size={20} />
               </div>
-              <span className="text-xl font-bold tracking-tight text-primary-foreground">
-                fin<span className="text-indigo-600 font-light">filer</span>
+              <span className="text-3xl font-bold tracking-tight text-primary-foreground">
+                Fin<span className="text-indigo-600 font-light">Filer</span>
               </span>
             </Link>
-            
+
             {/* Step indicator */}
             <div className="flex items-center gap-2 mb-4">
               <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-indigo-600' : 'bg-border'}`} />
@@ -313,15 +371,15 @@ export default function Register() {
 
           <AnimatePresence mode="wait" custom={direction}>
             {step === 1 && (
-              <motion.form 
+              <motion.form
                 key="step1-form"
                 custom={direction}
                 variants={slideVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="space-y-3" 
-                onSubmit={handleSendOtp} 
+                className="space-y-3"
+                onSubmit={handleSendOtp}
                 noValidate
               >
 

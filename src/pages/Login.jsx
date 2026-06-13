@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Lock, ArrowRight, ShieldCheck, FileText, CheckCircle2,
-  Loader2, Phone, RotateCcw, ChevronLeft
+  ArrowRight, ShieldCheck, FileText, CheckCircle2,
+  Loader2, Phone, RotateCcw, ChevronLeft, TrendingUp, Users, Star
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiCall } from '../utils/apiCall'
@@ -217,52 +217,108 @@ export default function Login() {
   return (
     <div className="flex h-screen overflow-hidden bg-white">
 
-      {/* ── Left: Visual Panel ── */}
-      <div className="hidden lg:flex w-1/2 relative bg-indigo-900 overflow-hidden items-center justify-center flex-shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40 animate-blob" />
+      {/* ── Left: Brand Panel ── */}
+      <div className="hidden lg:flex w-1/2 relative overflow-hidden items-center justify-center flex-shrink-0"
+        style={{ background: 'linear-gradient(145deg, #0a0f1e 0%, #0d1635 40%, #111827 100%)' }}>
 
-        <div className="relative z-10 w-full max-w-sm px-8">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="mb-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Expert Tax Solutions</h2>
-            <p className="text-indigo-200 text-sm">Maximize your returns with dedicated professionals.</p>
+        {/* Dot grid texture */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+          backgroundSize: '28px 28px'
+        }} />
+
+        {/* Glowing orbs */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 60%)' }} />
+
+        {/* Content */}
+        <div className="relative z-10 w-full px-10 flex flex-col gap-8">
+
+          {/* Brand */}
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-500/40">
+                <ShieldCheck size={20} className="text-white" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-white">Fin<span className="text-indigo-400 font-light">Filer</span></span>
+            </div>
+            <h2 className="text-3xl font-bold text-white leading-snug">
+              Your taxes,<br />
+              <span className="text-indigo-400">handled right.</span>
+            </h2>
+            <p className="mt-3 text-sm text-slate-400 leading-relaxed">
+              Sign in to access your dashboard, track refunds, and connect with expert tax consultants.
+            </p>
           </motion.div>
 
-          <div className="space-y-4">
-            <motion.div variants={float1} animate="animate"
-              className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl shadow-2xl">
+          {/* Floating cards */}
+          <div className="space-y-3">
+            {/* Card 1 — Refund status */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="rounded-2xl p-4 border border-white/8 backdrop-blur-xl"
+              style={{ background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+            >
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
-                  <CheckCircle2 size={18} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(52,211,153,0.15)' }}>
+                  <CheckCircle2 size={17} className="text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-emerald-400">Status</p>
+                  <p className="text-[11px] font-medium text-emerald-400 tracking-wide uppercase">IRS Status</p>
                   <p className="text-white font-bold text-sm">Return Accepted</p>
                 </div>
+                <span className="ml-auto text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">✓ Filed</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10">
-                <div className="h-1.5 w-full rounded-full bg-emerald-400" />
+              <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <div className="h-1.5 rounded-full bg-emerald-400" style={{ width: '100%' }} />
               </div>
-              <p className="text-xs text-indigo-200 text-right mt-1">100% Completed</p>
+              <p className="text-[11px] text-slate-500 text-right mt-1.5">Processing complete</p>
             </motion.div>
 
-            <motion.div variants={float2} animate="animate"
-              className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl shadow-2xl">
+            {/* Card 2 — Refund amount */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+              className="rounded-2xl p-4 border border-white/8 backdrop-blur-xl"
+              style={{ background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+            >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300">
-                  <FileText size={18} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'rgba(99,102,241,0.2)' }}>
+                  <TrendingUp size={17} className="text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-indigo-300">Est. Refund</p>
-                  <p className="text-2xl font-bold text-white">$4,250</p>
+                  <p className="text-[11px] font-medium text-indigo-400 tracking-wide uppercase">Est. Refund</p>
+                  <p className="text-3xl font-bold text-white tracking-tight">$4,250</p>
                 </div>
               </div>
-              <p className="text-xs text-indigo-200 border-t border-white/10 pt-2 mt-3">
-                Based on your uploaded W-2s and deductions.
+              <p className="text-[11px] text-slate-500 border-t border-white/8 pt-2.5 mt-3">
+                Based on W-2 uploads · 3 deductions applied
               </p>
             </motion.div>
           </div>
+
+          {/* Trust stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
+            className="grid grid-cols-3 gap-3 border-t border-white/8 pt-6"
+          >
+            {[{ icon: <Users size={14} />, val: '50K+', label: 'Clients' },
+              { icon: <FileText size={14} />, val: '99%', label: 'Accuracy' },
+              { icon: <Star size={14} />, val: '4.9★', label: 'Rating' }].map(({ icon, val, label }) => (
+              <div key={label} className="flex flex-col items-center gap-1">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg" style={{ background: 'rgba(99,102,241,0.15)' }}>
+                  <span className="text-indigo-400">{icon}</span>
+                </div>
+                <p className="text-sm font-bold text-white">{val}</p>
+                <p className="text-[11px] text-slate-500">{label}</p>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
 
@@ -272,17 +328,17 @@ export default function Login() {
 
           {/* Logo */}
           <motion.div variants={itemVariants} className="mb-6">
-            <Link to="/" className="flex items-center gap-2 mb-5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200">
-                <ShieldCheck size={18} />
+            <Link to="/" className="flex items-center gap-2 mb-8">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200">
+                <ShieldCheck size={20} />
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-900">
-                fin<span className="text-indigo-600 font-light">filer</span>
+              <span className="text-3xl font-bold tracking-tight text-slate-900">
+                Fin<span className="text-indigo-600 font-light">Filer</span>
               </span>
             </Link>
 
             {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-8">
               <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
               <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
             </div>
