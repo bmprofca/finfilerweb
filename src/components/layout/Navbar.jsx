@@ -52,8 +52,8 @@ const Navbar = ({
                   <span className="text-white font-bold text-sm">FF</span>
                 </div>
                 <div>
-                  <span className="text-xl font-bold text-gray-800 tracking-tight">
-                    FinFiler<span className="font-light text-gray-600">Admin</span>
+                  <span className="text-xl font-bold text-slate-900 tracking-tight">
+                    fin<span className="font-light text-indigo-600">filer</span>
                   </span>
                 </div>
               </button>
@@ -75,11 +75,11 @@ const Navbar = ({
                 </div>
 
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-semibold text-gray-800">
-                    Admin User
+                  <p className="text-sm font-semibold text-slate-900">
+                    Asha
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Administrator
+                  <p className="text-xs text-slate-500">
+                    Pro User
                   </p>
                 </div>
 
@@ -97,8 +97,8 @@ const Navbar = ({
                         <span className="text-white font-bold">A</span>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">Admin User</p>
-                        <p className="text-xs text-gray-500">Administrator</p>
+                        <p className="font-semibold text-slate-900">Asha</p>
+                        <p className="text-xs text-slate-500">Pro User</p>
                       </div>
                     </div>
 

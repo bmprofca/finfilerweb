@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   House, 
-  Users, 
-  ConciergeBell, 
-  LifeBuoy, 
-  BarChart3, 
+  Sparkles,
+  ClipboardList,
+  FolderOpen,
+  Briefcase,
   Settings,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
@@ -15,31 +15,12 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
   const currentPath = location.pathname;
 
   const menuItems = [
-    {
-      icon: House,
-      label: 'Dashboard',
-      path: '/',
-    },
-    {
-      icon: Users,
-      label: 'Users',
-      path: '/users',
-    },
-    {
-      icon: ConciergeBell,
-      label: 'Services',
-      path: '/services',
-    },
-    {
-      icon: BarChart3,
-      label: 'Reports',
-      path: '/reports',
-    },
-    {
-      icon: Settings,
-      label: 'Settings',
-      path: '/settings',
-    },
+    { icon: House, label: 'Dashboard', path: '/' },
+    { icon: Sparkles, label: 'Services', path: '/services' },
+    { icon: ClipboardList, label: 'Orders', path: '/orders' },
+    { icon: FolderOpen, label: 'Documents', path: '/documents' },
+    { icon: Briefcase, label: 'Funds & Business', path: '/funds-business' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   const isActiveRoute = (itemPath) => {
@@ -70,8 +51,8 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
                   A
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-800">Admin User</p>
-                  <p className="text-xs text-gray-500">admin@oomsadmin.com</p>
+                  <p className="font-semibold text-gray-800">Asha</p>
+                  <p className="text-xs text-gray-500">asha@example.com</p>
                 </div>
               </div>
             </div>
@@ -112,7 +93,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
             {/* Help Section */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4">
-                <LifeBuoy className="text-blue-600 mb-2" size={20} />
+                <Settings className="text-blue-600 mb-2" size={20} />
                 <p className="text-xs font-semibold text-gray-700 mb-1">Need Help?</p>
                 <p className="text-xs text-gray-500">Contact our support team</p>
               </div>
@@ -207,7 +188,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
         {isSidebarExpanded && (
           <div className="p-4 border-t border-gray-200">
             <div className="bg-gray-50 rounded-xl p-3">
-              <LifeBuoy className="text-blue-600 mb-2" size={16} />
+              <Settings className="text-blue-600 mb-2" size={16} />
               <p className="text-xs font-semibold text-gray-700">Need Help?</p>
               <p className="text-xs text-gray-500">Support</p>
             </div>
