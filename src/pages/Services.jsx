@@ -9,7 +9,8 @@ import {
   DollarSign, 
   ArrowRight,
   Search,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 import { apiCall } from '../utils/apiCall';
 import { useToast } from '../contexts/ToastContext';
@@ -18,13 +19,22 @@ import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher'
 import ManagementTable from '../components/common/ManagementTable';
 import ManagementGrid from '../components/common/ManagementGrid';
 import ManagementCard from '../components/common/ManagementCard';
-import AdminSkeleton from '../components/SkeletonComponent';
+import Modal from '../components/common/Modal';
+import AdminSkeleton, { DetailSkeleton } from '../components/SkeletonComponent';
 
 const formatCurrency = (cents) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   }).format(cents / 100);
+};
+
+const formatBytes = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 const getServiceIcon = (name = '', type = '') => {
@@ -51,6 +61,11 @@ export default function Services() {
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeActionId, setActiveActionId] = useState(null);
+
+  // Detail Modal States
+  const [modalOpen, setModalOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [selectedDetails, setSelectedDetails] = useState(null);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -86,16 +101,47 @@ export default function Services() {
     toast.success(`Purchase process started for ${service.name}!`);
   };
 
+  const handleViewDetails = async (serviceId) => {
+    setModalOpen(true);
+    setDetailsLoading(true);
+    setSelectedDetails(null);
+    try {
+      const response = await apiCall(`/services/details/${serviceId}`);
+      if (response.ok) {
+        const body = await response.json();
+        if (body.success && body.data) {
+          setSelectedDetails(body.data);
+        } else {
+          throw new Error('Failed to retrieve service details');
+        }
+      } else {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.error('Failed to fetch service details:', err);
+      toast.error('Failed to load service details.');
+      setModalOpen(false);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   const handleToggleAction = (e, menuId) => {
     setActiveActionId(menuId);
   };
 
   const getActions = (service) => [
     {
+      label: 'View Details',
+      icon: <Eye size={14} />,
+      onClick: () => handleViewDetails(service.service_id),
+      className: 'text-indigo-600 hover:text-indigo-700 font-semibold',
+    },
+    {
       label: 'Purchase Service',
       icon: <DollarSign size={14} />,
       onClick: () => handlePurchase(service),
-      className: 'text-indigo-600 hover:text-indigo-700 font-semibold',
+      className: 'text-slate-700 hover:text-slate-800 font-semibold',
     }
   ];
 
@@ -248,7 +294,7 @@ export default function Services() {
             getActions={getActions}
             activeId={activeActionId}
             onToggleAction={handleToggleAction}
-            onRowClick={handlePurchase}
+            onRowClick={(row) => handleViewDetails(row.service_id)}
           />
         ) : (
           <ManagementGrid viewMode="card">
@@ -267,7 +313,7 @@ export default function Services() {
                   menuId={`card-${service.service_id}`}
                   onToggle={handleToggleAction}
                   actions={getActions(service)}
-                  onClick={() => handlePurchase(service)}
+                  onClick={() => handleViewDetails(service.service_id)}
                   delay={index * 0.05}
                   footer={
                     <div className="flex items-center justify-between w-full pt-1" onClick={(e) => e.stopPropagation()}>
@@ -323,6 +369,85 @@ export default function Services() {
           </ManagementGrid>
         )}
       </ManagementHub>
+
+      {/* Details Modal */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={selectedDetails?.name || 'Service Details'}
+        onConfirm={selectedDetails ? () => { setModalOpen(false); handlePurchase(selectedDetails); } : null}
+        confirmText="Get Started"
+      >
+        {detailsLoading ? (
+          <DetailSkeleton />
+        ) : selectedDetails ? (
+          <div className="space-y-4">
+            {/* Price breakdown */}
+            <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 space-y-2.5 text-xs text-slate-700">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Base Price</span>
+                <span className="font-semibold text-slate-800">{formatCurrency(selectedDetails.base_price)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Tax Value ({selectedDetails.tax_rate}%)</span>
+                <span className="font-semibold text-slate-800">+{formatCurrency(selectedDetails.tax_value)}</span>
+              </div>
+              {selectedDetails.discount_value > 0 && (
+                <div className="flex justify-between text-emerald-600 font-semibold">
+                  <span>Discount ({selectedDetails.discount_percentage}%)</span>
+                  <span>-{formatCurrency(selectedDetails.discount_value)}</span>
+                </div>
+              )}
+              <div className="border-t border-slate-200/80 pt-2.5 flex justify-between font-bold text-sm text-indigo-600">
+                <span>Total Fees</span>
+                <span>{formatCurrency(selectedDetails.fees)}</span>
+              </div>
+            </div>
+
+            {/* Required Documents */}
+            <div>
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                Required Documents Checklist
+              </h4>
+              {selectedDetails.required_documents?.length > 0 ? (
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  {selectedDetails.required_documents.map((doc) => (
+                    <div 
+                      key={doc.required_id} 
+                      className="border border-slate-100 rounded-xl p-3 bg-white hover:bg-slate-50 transition shadow-sm"
+                    >
+                      <div className="flex justify-between items-start gap-2 mb-1">
+                        <span className="font-bold text-slate-800 text-xs">{doc.name}</span>
+                        {doc.is_required ? (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-red-50 border border-red-100 px-2 py-0.5 text-[9px] font-bold text-red-600">
+                            Required
+                          </span>
+                        ) : (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[9px] font-bold text-slate-500">
+                            Optional
+                          </span>
+                        )}
+                      </div>
+                      {doc.description && (
+                        <p className="text-[10px] text-slate-400 leading-normal mb-1.5">{doc.description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-x-2 text-[9px] text-slate-400 font-medium">
+                        <span>Formats: <span className="font-semibold text-slate-500">{doc.accept_extensions.join(', ').toUpperCase()}</span></span>
+                        <span>·</span>
+                        <span>Max Size: <span className="font-semibold text-slate-500">{formatBytes(doc.max_size)}</span></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic bg-slate-50/50 rounded-xl p-3 text-center">
+                  No documents required for this service.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 }
