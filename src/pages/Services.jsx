@@ -1,162 +1,328 @@
-import { motion } from 'framer-motion'
-import { ShieldCheck, FileText, TrendingUp, Users, ArrowRight, CheckCircle2, Star } from 'lucide-react'
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Server, 
+  User, 
+  Briefcase, 
+  ShieldCheck, 
+  MessageSquare, 
+  Sparkles, 
+  DollarSign, 
+  ArrowRight,
+  Search,
+  AlertCircle
+} from 'lucide-react';
+import { apiCall } from '../utils/apiCall';
+import { useToast } from '../contexts/ToastContext';
+import ManagementHub from '../components/common/ManagementHub';
+import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
+import ManagementTable from '../components/common/ManagementTable';
+import ManagementGrid from '../components/common/ManagementGrid';
+import ManagementCard from '../components/common/ManagementCard';
+import AdminSkeleton from '../components/SkeletonComponent';
 
-const services = [
-  {
-    icon: FileText,
-    title: 'Personal Tax Filing',
-    description: 'Accurate and hassle-free federal & state income tax return preparation by certified CPAs.',
-    price: '$149',
-    period: '/ return',
-    badge: 'Most Popular',
-    badgeColor: 'bg-indigo-100 text-indigo-700',
-    accentFrom: 'from-indigo-50',
-    accentBorder: 'border-indigo-200',
-    iconBg: 'bg-indigo-100 text-indigo-600',
-    features: ['Federal + State Returns', 'Deduction Optimizer', 'E-File Included', 'Audit Support'],
-  },
-  {
-    icon: TrendingUp,
-    title: 'Business Tax Filing',
-    description: 'Comprehensive tax solutions for LLCs, S-Corps, and sole proprietors to maximize deductions.',
-    price: '$349',
-    period: '/ return',
-    badge: 'Business',
-    badgeColor: 'bg-purple-100 text-purple-700',
-    accentFrom: 'from-purple-50',
-    accentBorder: 'border-purple-200',
-    iconBg: 'bg-purple-100 text-purple-600',
-    features: ['Business Entity Filing', 'Payroll Tax Review', 'Quarterly Planning', 'CPA Consultation'],
-  },
-  {
-    icon: ShieldCheck,
-    title: 'IRS Audit Defense',
-    description: 'Expert representation and document preparation if you receive an IRS notice or audit.',
-    price: '$499',
-    period: '/ case',
-    badge: 'Protection',
-    badgeColor: 'bg-amber-100 text-amber-700',
-    accentFrom: 'from-amber-50',
-    accentBorder: 'border-amber-200',
-    iconBg: 'bg-amber-100 text-amber-600',
-    features: ['IRS Correspondence', 'Document Preparation', 'Expert CPA Advocate', 'Resolution Strategy'],
-  },
-  {
-    icon: Users,
-    title: 'Tax Consultation',
-    description: '1-on-1 strategy sessions with a senior CPA to plan your taxes and minimize your liability.',
-    price: '$89',
-    period: '/ hour',
-    badge: 'Advisory',
-    badgeColor: 'bg-emerald-100 text-emerald-700',
-    accentFrom: 'from-emerald-50',
-    accentBorder: 'border-emerald-200',
-    iconBg: 'bg-emerald-100 text-emerald-600',
-    features: ['Personal CPA Advisor', 'Tax Strategy Session', 'Year-round Access', 'Priority Support'],
-  },
-]
+const formatCurrency = (cents) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(cents / 100);
+};
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-}
-
-const itemVariants = {
-  hidden: { y: 24, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } },
-}
+const getServiceIcon = (name = '', type = '') => {
+  const n = name.toLowerCase();
+  const t = type.toLowerCase();
+  
+  if (n.includes('migration') || n.includes('server') || n.includes('node') || n.includes('hosting')) return Server;
+  if (n.includes('personal') || n.includes('individual') || t.includes('personal')) return User;
+  if (n.includes('business') || n.includes('llc') || t.includes('business') || t.includes('corporate')) return Briefcase;
+  if (n.includes('audit') || n.includes('irs') || n.includes('defense') || t.includes('audit')) return ShieldCheck;
+  if (n.includes('consultation') || n.includes('advisory') || n.includes('talk') || t.includes('advisory')) return MessageSquare;
+  
+  return Sparkles;
+};
 
 export default function Services() {
-  return (
-    <motion.div
-      className="mx-auto max-w-6xl py-6 sm:py-8 px-2 sm:px-4"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="mb-8 sm:mb-12">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100">
-            <Star size={12} /> Our Services
-          </span>
-        </div>
-        <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-slate-900">
-          Expert Tax Solutions
-        </h1>
-        <p className="mt-2 sm:mt-3 text-sm sm:text-lg text-slate-500 max-w-2xl">
-          Professional tax services tailored to your needs. Certified CPAs ready to maximize your refund and minimize your liability.
-        </p>
-      </motion.div>
+  const toast = useToast();
+  
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const [viewMode, setViewMode] = useState('table');
+  const [activeTab, setActiveTab] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeActionId, setActiveActionId] = useState(null);
 
-      {/* Service Cards */}
-      <div className="grid gap-5 sm:gap-6 sm:grid-cols-2">
-        {services.map((service) => {
-          const Icon = service.icon
+  const fetchServices = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const typeParam = activeTab === 'All' ? '' : activeTab.toLowerCase();
+      const endpoint = `/services/list?page_no=1&limit=100&search=${encodeURIComponent(searchQuery)}&type=${encodeURIComponent(typeParam)}`;
+      const response = await apiCall(endpoint);
+      if (response.ok) {
+        const body = await response.json();
+        if (body.success && body.data) {
+          setServices(body.data.services || []);
+        } else {
+          throw new Error('Failed to retrieve services data');
+        }
+      } else {
+        throw new Error(`Server returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.error('Failed to fetch services:', err);
+      setError(err.message || 'Server error. Failed to load services.');
+      toast.error('Failed to load services. Please check your network.');
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, activeTab, searchQuery]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  const handlePurchase = (service) => {
+    toast.success(`Purchase process started for ${service.name}!`);
+  };
+
+  const handleToggleAction = (e, menuId) => {
+    setActiveActionId(menuId);
+  };
+
+  const getActions = (service) => [
+    {
+      label: 'Purchase Service',
+      icon: <DollarSign size={14} />,
+      onClick: () => handlePurchase(service),
+      className: 'text-indigo-600 hover:text-indigo-700 font-semibold',
+    }
+  ];
+
+  // Static tabs containing standard categories
+  const tabs = [
+    { id: 'All', label: 'All Services' },
+    { id: 'general', label: 'General' },
+    { id: 'personal', label: 'Personal' },
+    { id: 'business', label: 'Business' },
+    { id: 'protection', label: 'Protection' },
+    { id: 'advisory', label: 'Advisory' },
+  ];
+
+  // Server-side filtered services are directly bound to page view state
+  const filteredServices = services;
+
+  // Columns definition for ManagementTable
+  const columns = [
+    {
+      key: 'name',
+      label: 'Service Name',
+      render: (row) => {
+        const Icon = getServiceIcon(row.name, row.type);
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+              <Icon size={16} />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800 truncate max-w-[200px] sm:max-w-[300px]">{row.name}</p>
+              <p className="text-[10px] text-slate-400">ID: {row.service_id}</p>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      render: (row) => (
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 capitalize">
+          {row.type}
+        </span>
+      )
+    },
+    {
+      key: 'base_price',
+      label: 'Base Price',
+      render: (row) => (
+        <span className="text-slate-600 font-medium">
+          {formatCurrency(row.base_price)}
+        </span>
+      )
+    },
+    {
+      key: 'tax_value',
+      label: 'Tax (Rate)',
+      render: (row) => (
+        <span className="text-slate-600 font-medium">
+          {formatCurrency(row.tax_value)} ({row.tax_rate}%)
+        </span>
+      )
+    },
+    {
+      key: 'discount',
+      label: 'Discount',
+      render: (row) => {
+        if (row.discount_value > 0) {
           return (
-            <motion.div
-              key={service.title}
-              variants={itemVariants}
-              whileHover={{ y: -6, transition: { type: 'spring', stiffness: 400 } }}
-              className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border ${service.accentBorder} bg-gradient-to-br ${service.accentFrom} to-white p-5 sm:p-7 shadow-soft`}
-            >
-              {/* Badge */}
-              <span className={`absolute top-4 right-4 sm:top-5 sm:right-5 text-xs font-bold px-2.5 py-1 rounded-full ${service.badgeColor}`}>
-                {service.badge}
-              </span>
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 text-xs">
+              -{formatCurrency(row.discount_value)} ({row.discount_percentage}%)
+            </span>
+          );
+        }
+        return <span className="text-slate-400">—</span>;
+      }
+    },
+    {
+      key: 'fees',
+      label: 'Final Price',
+      render: (row) => (
+        <span className="text-sm font-bold text-indigo-600">
+          {formatCurrency(row.fees)}
+        </span>
+      )
+    }
+  ];
 
-              <div className={`mb-4 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl ${service.iconBg}`}>
-                <Icon size={22} />
-              </div>
+  const summarySlot = (
+    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 w-full sm:w-72 shadow-sm focus-within:border-indigo-500 transition">
+      <Search size={14} className="text-slate-400" />
+      <input
+        type="text"
+        placeholder="Search services..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full bg-transparent text-xs text-slate-900 outline-none placeholder:text-slate-400"
+      />
+    </div>
+  );
 
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">{service.title}</h2>
-              <p className="text-sm text-slate-500 leading-relaxed mb-5">{service.description}</p>
-
-              {/* Features */}
-              <ul className="space-y-2 mb-6">
-                {service.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
-                    <CheckCircle2 size={15} className="text-indigo-500 flex-shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-2xl sm:text-3xl font-bold text-slate-900">{service.price}</span>
-                  <span className="text-slate-400 text-sm ml-1">{service.period}</span>
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-600"
-                >
-                  Get Started <ArrowRight size={15} />
-                </motion.button>
-              </div>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* CTA Banner */}
-      <motion.div
-        variants={itemVariants}
-        className="mt-8 sm:mt-12 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
+  return (
+    <div className="py-4">
+      <ManagementHub
+        eyebrow="Our Services"
+        title="Dynamic Solutions"
+        description="Select from our range of dynamic business and tax-focused software solutions."
+        accent="indigo"
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onRefresh={fetchServices}
+        refreshing={loading}
+        summary={summarySlot}
+        widthClassName="max-w-[1400px]"
+        actions={
+          <ManagementViewSwitcher
+            viewMode={viewMode}
+            onChange={setViewMode}
+            className="sm:w-auto"
+          />
+        }
       >
-        <div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">Not sure what you need?</h3>
-          <p className="text-indigo-100 text-sm sm:text-base">Book a free 15-minute consultation with one of our CPAs.</p>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          className="flex-shrink-0 flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-indigo-700 shadow-lg transition hover:shadow-xl w-full sm:w-auto justify-center"
-        >
-          Book Free Call <ArrowRight size={16} />
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  )
+        {loading ? (
+          <AdminSkeleton />
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm text-center px-4">
+            <AlertCircle className="mb-4 text-red-500 h-12 w-12" />
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Error Loading Services</h3>
+            <p className="text-slate-500 text-sm max-w-md mb-6">{error}</p>
+            <button
+              onClick={fetchServices}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2 rounded-xl transition"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredServices.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm text-center px-4">
+            <AlertCircle className="mb-4 text-slate-300 h-12 w-12" />
+            <h3 className="text-lg font-bold text-slate-800 mb-1">No Services Found</h3>
+            <p className="text-slate-500 text-sm">We couldn't find any services matching your selection.</p>
+          </div>
+        ) : viewMode === 'table' ? (
+          <ManagementTable
+            rows={filteredServices}
+            columns={columns}
+            rowKey="service_id"
+            accent="indigo"
+            getActions={getActions}
+            activeId={activeActionId}
+            onToggleAction={handleToggleAction}
+            onRowClick={handlePurchase}
+          />
+        ) : (
+          <ManagementGrid viewMode="card">
+            {filteredServices.map((service, index) => {
+              const Icon = getServiceIcon(service.name, service.type);
+              return (
+                <ManagementCard
+                  key={service.service_id}
+                  title={service.name}
+                  subtitle={service.type.toUpperCase()}
+                  eyebrow={`ID: ${service.service_id}`}
+                  icon={<Icon size={16} />}
+                  accent="indigo"
+                  hoverable={true}
+                  activeId={activeActionId}
+                  menuId={`card-${service.service_id}`}
+                  onToggle={handleToggleAction}
+                  actions={getActions(service)}
+                  onClick={() => handlePurchase(service)}
+                  delay={index * 0.05}
+                  footer={
+                    <div className="flex items-center justify-between w-full pt-1" onClick={(e) => e.stopPropagation()}>
+                      <div>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total Cost</p>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-base font-bold text-indigo-600">
+                            {formatCurrency(service.fees)}
+                          </span>
+                          {service.discount_value > 0 && (
+                            <span className="text-[11px] text-slate-400 line-through">
+                              {formatCurrency(service.total_fees)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => handlePurchase(service)}
+                        className="inline-flex items-center gap-1 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-indigo-600"
+                      >
+                        Get Started <ArrowRight size={13} />
+                      </button>
+                    </div>
+                  }
+                  badge={
+                    service.discount_value > 0 ? (
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                        {service.discount_percentage}% OFF
+                      </span>
+                    ) : null
+                  }
+                >
+                  <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Base Price</span>
+                      <span className="font-semibold text-slate-700">{formatCurrency(service.base_price)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Tax ({service.tax_rate}%)</span>
+                      <span className="font-semibold text-slate-700">+{formatCurrency(service.tax_value)}</span>
+                    </div>
+                    {service.discount_value > 0 && (
+                      <div className="flex justify-between text-emerald-600 font-medium">
+                        <span>Discount ({service.discount_percentage}%)</span>
+                        <span>-{formatCurrency(service.discount_value)}</span>
+                      </div>
+                    )}
+                  </div>
+                </ManagementCard>
+              );
+            })}
+          </ManagementGrid>
+        )}
+      </ManagementHub>
+    </div>
+  );
 }
