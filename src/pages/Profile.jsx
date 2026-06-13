@@ -222,7 +222,7 @@ const Profile = () => {
                   type="email"
                   defaultValue={user?.email || ''}
                   readOnly
-                  className="w-full px-4 py-2 bg-secondary/50 border border-border rounded-lg text-secondary-foreground transition-all cursor-not-allowed opacity-70"
+                  className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-secondary-foreground transition-all cursor-not-allowed opacity-70"
                 />
               </div>
 
@@ -232,7 +232,7 @@ const Profile = () => {
                   type="tel"
                   defaultValue={user?.mobile || ''}
                   readOnly
-                  className="w-full px-4 py-2 bg-secondary/50 border border-border rounded-lg text-secondary-foreground transition-all cursor-not-allowed opacity-70"
+                  className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-secondary-foreground transition-all cursor-not-allowed opacity-70"
                 />
               </div>
             </div>
