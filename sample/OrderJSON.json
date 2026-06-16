@@ -21,7 +21,12 @@
     },
     "pan_image": {
         "lavel": "PAN Image",
-        "value": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+        "value": "https://server.finfiler.com/media/pan_image.png",
+        "type": "image"
+    },
+    "bank_statement": {
+        "lavel": "Bank Statement",
+        "value": "document/bank_statement.png",
         "type": "image"
     },
     "address": {
