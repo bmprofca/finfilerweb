@@ -1,0 +1,9 @@
+{
+    "mobile": true,
+    "email": true,
+    "pan_no": true,
+    "pan_image": false,
+    "aadhaar_no": true,
+    "aadhaar_image": false,
+    "bank_statement": true
+}
