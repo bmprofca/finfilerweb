@@ -1,0 +1,37 @@
+{
+    "name": {
+        "lavel": "name",
+        "value": "John Doe",
+        "type": "text"
+    },
+    "aadhaar_no": {
+        "lavel": "Aadhaar No",
+        "value": "1234567890",
+        "type": "number"
+    },
+    "mobile_no": {
+        "lavel": "Mobile No",
+        "value": "1234567890",
+        "type": "number"
+    },
+    "pan_no": {
+        "lavel": "PAN No",
+        "value": "1234567890",
+        "type": "text"
+    },
+    "pan_image": {
+        "lavel": "PAN Image",
+        "value": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+        "type": "image"
+    },
+    "address": {
+        "address_line1": {
+            "lavel": "Address Line 1",
+            "value": "1234567890"
+        },
+        "address_line2": {
+            "lavel": "Address Line 2",
+            "value": "1234567890"
+        }
+    }
+}
