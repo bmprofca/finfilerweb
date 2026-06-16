@@ -5,6 +5,7 @@ import {
   ClipboardList,
   FolderOpen,
   Briefcase,
+  Building2,
   Settings,
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
@@ -21,6 +22,7 @@ const Sidebar = ({ isMobile, sidebarOpen, toggleSidebar, onHover, isExpanded }) 
     { icon: Sparkles, label: 'Services', path: '/services' },
     { icon: ClipboardList, label: 'Orders', path: '/orders' },
     { icon: FolderOpen, label: 'Documents', path: '/documents' },
+    { icon: Building2, label: 'Firms', path: '/firms' },
     { icon: Briefcase, label: 'Funds & Business', path: '/funds-business' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];

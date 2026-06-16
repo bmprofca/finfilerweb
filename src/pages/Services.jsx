@@ -1,93 +1,220 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Server, 
-  User, 
-  Briefcase, 
-  ShieldCheck, 
-  MessageSquare, 
-  Sparkles, 
-  DollarSign, 
-  ArrowRight,
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
   Search,
   AlertCircle,
-  Eye
-} from 'lucide-react';
-import { apiCall } from '../utils/apiCall';
-import { useToast } from '../contexts/ToastContext';
-import ManagementHub from '../components/common/ManagementHub';
-import ManagementViewSwitcher from '../components/common/ManagementViewSwitcher';
-import ManagementTable from '../components/common/ManagementTable';
-import ManagementGrid from '../components/common/ManagementGrid';
-import ManagementCard from '../components/common/ManagementCard';
-import Modal from '../components/common/Modal';
-import AdminSkeleton, { DetailSkeleton } from '../components/SkeletonComponent';
+  ShoppingBag,
+  Eye,
+  Loader2,
+  Tag,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
+import { apiCall } from "../utils/apiCall";
+import { useToast } from "../contexts/ToastContext";
 
-const formatCurrency = (cents) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(cents / 100);
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+const getApplicationPath = (serviceId, orderId) =>
+  `/application/${serviceId}/${orderId}`;
+
+const TABS = [
+  { id: "All", label: "All Services" },
+  { id: "general", label: "General" },
+  { id: "personal", label: "Personal" },
+  { id: "business", label: "Business" },
+  { id: "protection", label: "Protection" },
+  { id: "advisory", label: "Advisory" },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
 };
 
-const formatBytes = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
 };
 
-const getServiceIcon = (name = '', type = '') => {
-  const n = name.toLowerCase();
-  const t = type.toLowerCase();
-  
-  if (n.includes('migration') || n.includes('server') || n.includes('node') || n.includes('hosting')) return Server;
-  if (n.includes('personal') || n.includes('individual') || t.includes('personal')) return User;
-  if (n.includes('business') || n.includes('llc') || t.includes('business') || t.includes('corporate')) return Briefcase;
-  if (n.includes('audit') || n.includes('irs') || n.includes('defense') || t.includes('audit')) return ShieldCheck;
-  if (n.includes('consultation') || n.includes('advisory') || n.includes('talk') || t.includes('advisory')) return MessageSquare;
-  
-  return Sparkles;
-};
+function ServiceCardSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-secondary animate-pulse">
+      <div className="aspect-[4/3] bg-border" />
+      <div className="space-y-3 p-4">
+        <div className="h-3 w-16 rounded bg-border" />
+        <div className="h-5 w-3/4 rounded bg-border" />
+        <div className="h-4 w-1/2 rounded bg-border" />
+        <div className="h-10 rounded-xl bg-border" />
+      </div>
+    </div>
+  );
+}
+
+function ServiceImage({ src, alt, className }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-400 ${className}`}
+      >
+        <Sparkles size={40} />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function ServiceCard({
+  service,
+  index,
+  onViewDetails,
+  onPurchase,
+  purchasing,
+}) {
+  const hasDiscount = service.discount_value > 0;
+
+  return (
+    <motion.article
+      variants={itemVariants}
+      whileHover={{ y: -6 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-secondary shadow-soft transition-shadow hover:shadow-xl"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-primary">
+        {hasDiscount && (
+          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-md">
+            <Tag size={11} />
+            {service.discount_percentage}% off
+          </span>
+        )}
+
+        {service.image ? (
+          <ServiceImage
+            src={service.image}
+            alt={service.name}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-400">
+            <Sparkles size={40} />
+          </div>
+        )}
+
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-3 pb-3 pt-10">
+          <span className="inline-flex rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-700 backdrop-blur-sm">
+            {service.type}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <h3 className="line-clamp-2 min-h-[2.75rem] text-base font-bold leading-snug text-primary-foreground">
+          {service.name}
+        </h3>
+
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <span className="text-xl font-bold text-indigo-600">
+            {formatCurrency(service.fees)}
+          </span>
+          {hasDiscount && (
+            <span className="text-sm text-slate-400 line-through">
+              {formatCurrency(service.total_fees)}
+            </span>
+          )}
+        </div>
+
+        <p className="mt-1 text-xs text-secondary-foreground">
+          Inclusive of {service.tax_rate}% tax
+          {hasDiscount && (
+            <span className="text-emerald-600">
+              {" "}
+              · Save {formatCurrency(service.discount_value)}
+            </span>
+          )}
+        </p>
+
+        <div className="mt-auto flex gap-2 pt-4">
+          <button
+            type="button"
+            onClick={() => onViewDetails(service.service_id)}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-primary px-3 py-2.5 text-xs font-semibold text-primary-foreground transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+          >
+            <Eye size={14} />
+            Details
+          </button>
+          <button
+            type="button"
+            onClick={() => onPurchase(service)}
+            disabled={purchasing}
+            className="inline-flex flex-[1.4] items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {purchasing ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <ShoppingBag size={14} />
+            )}
+            Buy Now
+          </button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
 
 export default function Services() {
   const toast = useToast();
-  
+  const navigate = useNavigate();
+
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const [viewMode, setViewMode] = useState('table');
-  const [activeTab, setActiveTab] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeActionId, setActiveActionId] = useState(null);
-
-  // Detail Modal States
-  const [modalOpen, setModalOpen] = useState(false);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [selectedDetails, setSelectedDetails] = useState(null);
+  const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [purchasingId, setPurchasingId] = useState(null);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const typeParam = activeTab === 'All' ? '' : activeTab.toLowerCase();
+      const typeParam = activeTab === "All" ? "" : activeTab.toLowerCase();
       const endpoint = `/services/list?page_no=1&limit=100&search=${encodeURIComponent(searchQuery)}&type=${encodeURIComponent(typeParam)}`;
       const response = await apiCall(endpoint);
+
       if (response.ok) {
         const body = await response.json();
         if (body.success && body.data) {
           setServices(body.data.services || []);
         } else {
-          throw new Error('Failed to retrieve services data');
+          throw new Error("Failed to retrieve services data");
         }
       } else {
         throw new Error(`Server returned status ${response.status}`);
       }
     } catch (err) {
-      console.error('Failed to fetch services:', err);
-      setError(err.message || 'Server error. Failed to load services.');
-      toast.error('Failed to load services. Please check your network.');
+      console.error("Failed to fetch services:", err);
+      setError(err.message || "Server error. Failed to load services.");
+      toast.error("Failed to load services. Please check your network.");
     } finally {
       setLoading(false);
     }
@@ -97,357 +224,162 @@ export default function Services() {
     fetchServices();
   }, [fetchServices]);
 
-  const handlePurchase = (service) => {
-    toast.success(`Purchase process started for ${service.name}!`);
-  };
+  const handlePurchase = async (service) => {
+    setPurchasingId(service.service_id);
+    const toastId = toast.loading(`Processing ${service.name}…`);
 
-  const handleViewDetails = async (serviceId) => {
-    setModalOpen(true);
-    setDetailsLoading(true);
-    setSelectedDetails(null);
     try {
-      const response = await apiCall(`/services/details/${serviceId}`);
-      if (response.ok) {
-        const body = await response.json();
-        if (body.success && body.data) {
-          setSelectedDetails(body.data);
-        } else {
-          throw new Error('Failed to retrieve service details');
-        }
-      } else {
-        throw new Error(`Server returned status ${response.status}`);
+      const response = await apiCall("/orders/create", "POST", {
+        service_id: service.service_id,
+      });
+      const body = await response.json();
+
+      if (response.ok && body.success && body.data?.order_id) {
+        toast.dismiss(toastId);
+        toast.success("Order placed! Complete your application.");
+        navigate(getApplicationPath(service.service_id, body.data.order_id));
+        return;
       }
+
+      throw new Error(body.message || "Failed to create order.");
     } catch (err) {
-      console.error('Failed to fetch service details:', err);
-      toast.error('Failed to load service details.');
-      setModalOpen(false);
+      console.error("Purchase failed:", err);
+      toast.dismiss(toastId);
+      toast.error(err.message || "Could not start purchase. Please try again.");
     } finally {
-      setDetailsLoading(false);
+      setPurchasingId(null);
     }
   };
 
-  const handleToggleAction = (e, menuId) => {
-    setActiveActionId(menuId);
+  const handleViewDetails = (serviceId) => {
+    navigate(`/services/${serviceId}`);
   };
-
-  const getActions = (service) => [
-    {
-      label: 'View Details',
-      icon: <Eye size={14} />,
-      onClick: () => handleViewDetails(service.service_id),
-      className: 'text-indigo-600 hover:text-indigo-700 font-semibold',
-    },
-    {
-      label: 'Purchase Service',
-      icon: <DollarSign size={14} />,
-      onClick: () => handlePurchase(service),
-      className: 'text-primary-foreground hover:text-primary-foreground font-semibold',
-    }
-  ];
-
-  // Static tabs containing standard categories
-  const tabs = [
-    { id: 'All', label: 'All Services' },
-    { id: 'general', label: 'General' },
-    { id: 'personal', label: 'Personal' },
-    { id: 'business', label: 'Business' },
-    { id: 'protection', label: 'Protection' },
-    { id: 'advisory', label: 'Advisory' },
-  ];
-
-  // Server-side filtered services are directly bound to page view state
-  const filteredServices = services;
-
-  // Columns definition for ManagementTable
-  const columns = [
-    {
-      key: 'name',
-      label: 'Service Name',
-      render: (row) => {
-        const Icon = getServiceIcon(row.name, row.type);
-        return (
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-              <Icon size={16} />
-            </div>
-            <div>
-              <p className="font-semibold text-primary-foreground truncate max-w-[200px] sm:max-w-[300px]">{row.name}</p>
-              <p className="text-[10px] text-slate-400">ID: {row.service_id}</p>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      key: 'type',
-      label: 'Type',
-      render: (row) => (
-        <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground capitalize">
-          {row.type}
-        </span>
-      )
-    },
-    {
-      key: 'base_price',
-      label: 'Base Price',
-      render: (row) => (
-        <span className="text-secondary-foreground font-medium">
-          {formatCurrency(row.base_price)}
-        </span>
-      )
-    },
-    {
-      key: 'tax_value',
-      label: 'Tax (Rate)',
-      render: (row) => (
-        <span className="text-secondary-foreground font-medium">
-          {formatCurrency(row.tax_value)} ({row.tax_rate}%)
-        </span>
-      )
-    },
-    {
-      key: 'discount',
-      label: 'Discount',
-      render: (row) => {
-        if (row.discount_value > 0) {
-          return (
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 text-xs">
-              -{formatCurrency(row.discount_value)} ({row.discount_percentage}%)
-            </span>
-          );
-        }
-        return <span className="text-slate-400">—</span>;
-      }
-    },
-    {
-      key: 'fees',
-      label: 'Final Price',
-      render: (row) => (
-        <span className="text-sm font-bold text-indigo-600">
-          {formatCurrency(row.fees)}
-        </span>
-      )
-    }
-  ];
-
-  const summarySlot = (
-    <div className="flex items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-1.5 w-full sm:w-72 shadow-sm focus-within:border-indigo-500 transition">
-      <Search size={14} className="text-slate-400" />
-      <input
-        type="text"
-        placeholder="Search services..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full bg-transparent text-xs text-primary-foreground outline-none placeholder:text-slate-400"
-      />
-    </div>
-  );
 
   return (
-    <div className="py-4">
-      <ManagementHub
-        eyebrow="Our Services"
-        title="Dynamic Solutions"
-        description="Select from our range of dynamic business and tax-focused software solutions."
-        accent="indigo"
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onRefresh={fetchServices}
-        refreshing={loading}
-        summary={summarySlot}
-        widthClassName="max-w-[1400px]"
-        actions={
-          <ManagementViewSwitcher
-            viewMode={viewMode}
-            onChange={setViewMode}
-            className="sm:w-auto"
-          />
-        }
+    <motion.div
+      className="mx-auto max-w-7xl py-4 sm:py-6 px-2 sm:px-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="mb-6 sm:mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
       >
-        {loading ? (
-          <AdminSkeleton />
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-secondary border border-border rounded-2xl shadow-sm text-center px-4">
-            <AlertCircle className="mb-4 text-red-500 h-12 w-12" />
-            <h3 className="text-lg font-bold text-primary-foreground mb-2">Error Loading Services</h3>
-            <p className="text-secondary-foreground text-sm max-w-md mb-6">{error}</p>
-            <button
-              onClick={fetchServices}
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-4 py-2 rounded-xl transition"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : filteredServices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-secondary border border-border rounded-2xl shadow-sm text-center px-4">
-            <AlertCircle className="mb-4 text-slate-300 h-12 w-12" />
-            <h3 className="text-lg font-bold text-primary-foreground mb-1">No Services Found</h3>
-            <p className="text-secondary-foreground text-sm">We couldn't find any services matching your selection.</p>
-          </div>
-        ) : viewMode === 'table' ? (
-          <ManagementTable
-            rows={filteredServices}
-            columns={columns}
-            rowKey="service_id"
-            accent="indigo"
-            getActions={getActions}
-            activeId={activeActionId}
-            onToggleAction={handleToggleAction}
-            onRowClick={(row) => handleViewDetails(row.service_id)}
-          />
-        ) : (
-          <ManagementGrid viewMode="card">
-            {filteredServices.map((service, index) => {
-              const Icon = getServiceIcon(service.name, service.type);
-              return (
-                <ManagementCard
-                  key={service.service_id}
-                  title={service.name}
-                  subtitle={service.type.toUpperCase()}
-                  eyebrow={`ID: ${service.service_id}`}
-                  icon={<Icon size={16} />}
-                  accent="indigo"
-                  hoverable={true}
-                  activeId={activeActionId}
-                  menuId={`card-${service.service_id}`}
-                  onToggle={handleToggleAction}
-                  actions={getActions(service)}
-                  onClick={() => handleViewDetails(service.service_id)}
-                  delay={index * 0.05}
-                  footer={
-                    <div className="flex items-center justify-between w-full pt-1" onClick={(e) => e.stopPropagation()}>
-                      <div>
-                        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total Cost</p>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-base font-bold text-indigo-600">
-                            {formatCurrency(service.fees)}
-                          </span>
-                          {service.discount_value > 0 && (
-                            <span className="text-[11px] text-slate-400 line-through">
-                              {formatCurrency(service.total_fees)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <button 
-                        type="button" 
-                        onClick={() => handlePurchase(service)}
-                        className="inline-flex items-center gap-1 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-indigo-600"
-                      >
-                        Get Started <ArrowRight size={13} />
-                      </button>
-                    </div>
-                  }
-                  badge={
-                    service.discount_value > 0 ? (
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                        {service.discount_percentage}% OFF
-                      </span>
-                    ) : null
-                  }
-                >
-                  <div className="mt-3 space-y-2 border-t border-border pt-3 text-xs text-secondary-foreground">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Base Price</span>
-                      <span className="font-semibold text-primary-foreground">{formatCurrency(service.base_price)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Tax ({service.tax_rate}%)</span>
-                      <span className="font-semibold text-primary-foreground">+{formatCurrency(service.tax_value)}</span>
-                    </div>
-                    {service.discount_value > 0 && (
-                      <div className="flex justify-between text-emerald-600 font-medium">
-                        <span>Discount ({service.discount_percentage}%)</span>
-                        <span>-{formatCurrency(service.discount_value)}</span>
-                      </div>
-                    )}
-                  </div>
-                </ManagementCard>
-              );
-            })}
-          </ManagementGrid>
-        )}
-      </ManagementHub>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">
+            Marketplace
+          </p>
+          <h1 className="font-display mt-1 text-2xl sm:text-4xl font-bold tracking-tight text-primary-foreground">
+            Our Services
+          </h1>
+          <p className="mt-1 sm:mt-2 max-w-2xl text-sm sm:text-base text-secondary-foreground">
+            Browse and purchase registration and compliance services. Each
+            service links to its application form after checkout.
+          </p>
+        </div>
 
-      {/* Details Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={selectedDetails?.name || 'Service Details'}
-        onConfirm={selectedDetails ? () => { setModalOpen(false); handlePurchase(selectedDetails); } : null}
-        confirmText="Get Started"
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+          <div className="flex flex-1 items-center gap-2 rounded-xl border border-border bg-secondary px-3 py-2.5 shadow-sm focus-within:border-indigo-500 transition sm:min-w-[260px]">
+            <Search size={16} className="shrink-0 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search services…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-sm text-primary-foreground outline-none placeholder:text-slate-400"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={fetchServices}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary disabled:opacity-50"
+          >
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            Refresh
+          </button>
+        </div>
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants}
+        className="mb-6 flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
       >
-        {detailsLoading ? (
-          <DetailSkeleton />
-        ) : selectedDetails ? (
-          <div className="space-y-4">
-            {/* Price breakdown */}
-            <div className="bg-primary border border-border/60 rounded-xl p-4 space-y-2.5 text-xs text-primary-foreground">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Base Price</span>
-                <span className="font-semibold text-primary-foreground">{formatCurrency(selectedDetails.base_price)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Tax Value ({selectedDetails.tax_rate}%)</span>
-                <span className="font-semibold text-primary-foreground">+{formatCurrency(selectedDetails.tax_value)}</span>
-              </div>
-              {selectedDetails.discount_value > 0 && (
-                <div className="flex justify-between text-emerald-600 font-semibold">
-                  <span>Discount ({selectedDetails.discount_percentage}%)</span>
-                  <span>-{formatCurrency(selectedDetails.discount_value)}</span>
-                </div>
-              )}
-              <div className="border-t border-border/80 pt-2.5 flex justify-between font-bold text-sm text-indigo-600">
-                <span>Total Fees</span>
-                <span>{formatCurrency(selectedDetails.fees)}</span>
-              </div>
-            </div>
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+              activeTab === tab.id
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                : "border border-border bg-secondary text-secondary-foreground hover:bg-primary"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </motion.div>
 
-            {/* Required Documents */}
-            <div>
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">
-                Required Documents Checklist
-              </h4>
-              {selectedDetails.required_documents?.length > 0 ? (
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                  {selectedDetails.required_documents.map((doc) => (
-                    <div 
-                      key={doc.required_id} 
-                      className="border border-border rounded-xl p-3 bg-secondary hover:bg-primary transition shadow-sm"
-                    >
-                      <div className="flex justify-between items-start gap-2 mb-1">
-                        <span className="font-bold text-primary-foreground text-xs">{doc.name}</span>
-                        {doc.is_required ? (
-                          <span className="inline-flex shrink-0 items-center rounded-full bg-red-50 border border-red-100 px-2 py-0.5 text-[9px] font-bold text-red-600">
-                            Required
-                          </span>
-                        ) : (
-                          <span className="inline-flex shrink-0 items-center rounded-full bg-secondary border border-border px-2 py-0.5 text-[9px] font-bold text-secondary-foreground">
-                            Optional
-                          </span>
-                        )}
-                      </div>
-                      {doc.description && (
-                        <p className="text-[10px] text-slate-400 leading-normal mb-1.5">{doc.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-x-2 text-[9px] text-slate-400 font-medium">
-                        <span>Formats: <span className="font-semibold text-secondary-foreground">{doc.accept_extensions.join(', ').toUpperCase()}</span></span>
-                        <span>·</span>
-                        <span>Max Size: <span className="font-semibold text-secondary-foreground">{formatBytes(doc.max_size)}</span></span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic bg-primary/50 rounded-xl p-3 text-center">
-                  No documents required for this service.
-                </p>
-              )}
-            </div>
-          </div>
-        ) : null}
-      </Modal>
-    </div>
+      {loading ? (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ServiceCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : error ? (
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col items-center justify-center rounded-2xl border border-border bg-secondary py-16 text-center shadow-soft"
+        >
+          <AlertCircle className="mb-4 h-12 w-12 text-red-500" />
+          <h3 className="text-lg font-bold text-primary-foreground">
+            Error Loading Services
+          </h3>
+          <p className="mt-2 max-w-md text-sm text-secondary-foreground">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={fetchServices}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+          >
+            Try Again
+          </button>
+        </motion.div>
+      ) : services.length === 0 ? (
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col items-center justify-center rounded-2xl border border-border bg-secondary py-16 text-center shadow-soft"
+        >
+          <ShoppingBag className="mb-4 h-12 w-12 text-slate-300" />
+          <h3 className="text-lg font-bold text-primary-foreground">
+            No Services Found
+          </h3>
+          <p className="mt-1 text-sm text-secondary-foreground">
+            Try a different category or search term.
+          </p>
+        </motion.div>
+      ) : (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+        >
+          {services.map((service, index) => (
+            <ServiceCard
+              key={service.service_id}
+              service={service}
+              index={index}
+              onViewDetails={handleViewDetails}
+              onPurchase={handlePurchase}
+              purchasing={purchasingId === service.service_id}
+            />
+          ))}
+        </motion.div>
+      )}
+    </motion.div>
   );
 }

@@ -1,4 +1,27 @@
-const API_BASE = "https://server.finfiler.com/api";
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://server.finfiler.com/api';
+export const APP_ENV = process.env.REACT_APP_ENV || process.env.NODE_ENV;
+export const IS_DEVELOPMENT = APP_ENV === 'development';
+
+export const getServerOrigin = () => API_BASE.replace(/\/api\/?$/, '');
+
+/**
+ * Build a full media URL for img/src. Absolute URLs from the API are used as-is.
+ */
+export const resolveMediaUrl = (url) => {
+  if (!url) return '';
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  const serverOrigin = getServerOrigin();
+
+  if (url.startsWith('/')) {
+    return `${serverOrigin}${url}`;
+  }
+
+  return `${serverOrigin}/${url.replace(/^\/+/, '')}`;
+};
 
 /**
  * Unified API calling utility
