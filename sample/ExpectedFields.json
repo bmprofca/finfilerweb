@@ -1,0 +1,6 @@
+{
+    "mobile": true,
+    "email": true,
+    "pan_no": true,
+    "aadhaar_no": true
+}

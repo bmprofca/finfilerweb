@@ -16,6 +16,7 @@ import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
 import ManagementTable from "../components/common/ManagementTable";
 import Pagination from "../components/common/PaginationComponent";
+import FirmFormModal from "../components/firms/FirmFormModal";
 
 const FIRM_TYPE_LABELS = {
   proprietorship: "Proprietorship",
@@ -56,6 +57,7 @@ export default function FirmList() {
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
   const [deletingId, setDeletingId] = useState(null);
+  const [firmModal, setFirmModal] = useState({ open: false, mode: "create", firmId: null });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
@@ -143,6 +145,23 @@ export default function FirmList() {
     },
   ];
 
+  const openCreateModal = () => {
+    setFirmModal({ open: true, mode: "create", firmId: null });
+  };
+
+  const openEditModal = (firmId) => {
+    setFirmModal({ open: true, mode: "edit", firmId });
+  };
+
+  const closeFirmModal = () => {
+    setFirmModal({ open: false, mode: "create", firmId: null });
+  };
+
+  const handleFirmSaved = () => {
+    closeFirmModal();
+    fetchFirms();
+  };
+
   const getActions = (row) => [
     {
       label: "View Details",
@@ -152,7 +171,7 @@ export default function FirmList() {
     {
       label: "Edit",
       icon: <Pencil size={14} />,
-      onClick: () => navigate(`/firms/${row.firm_id}/edit`),
+      onClick: () => openEditModal(row.firm_id),
     },
     {
       label: deletingId === row.firm_id ? "Deleting…" : "Delete",
@@ -193,7 +212,7 @@ export default function FirmList() {
             Refresh
           </button>
           <button
-            onClick={() => navigate("/firms/new")}
+            onClick={openCreateModal}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 transition"
           >
             <Plus size={18} />
@@ -247,7 +266,7 @@ export default function FirmList() {
             </p>
             {!debouncedSearch && (
               <button
-                onClick={() => navigate("/firms/new")}
+                onClick={openCreateModal}
                 className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition"
               >
                 <Plus size={16} />
@@ -282,6 +301,14 @@ export default function FirmList() {
           </>
         )}
       </motion.div>
+
+      <FirmFormModal
+        isOpen={firmModal.open}
+        onClose={closeFirmModal}
+        mode={firmModal.mode}
+        firmId={firmModal.firmId}
+        onSuccess={handleFirmSaved}
+      />
     </motion.div>
   );
 }

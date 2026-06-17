@@ -18,9 +18,9 @@ import Documents from "./pages/Documents";
 import FundsBusiness from "./pages/FundsBusiness";
 import FirmList from "./pages/FirmList";
 import FirmDetails from "./pages/FirmDetails";
-import FirmForm from "./pages/FirmForm";
+import OrderCreate from "./pages/OrderCreate";
+import OrderDetails from "./pages/OrderDetails";
 import Profile from "./pages/Profile";
-import GSTRegistration from "./pages/application/GSTRegistration";
 import NotFound from "./pages/NotFound";
 import ServerUnreachable from "./pages/ServerUnreachable";
 
@@ -47,16 +47,15 @@ function App() {
                 <Route path="home" element={<Home />} />
                 <Route path="dashboard" element={<Home />} />
                 <Route path="services" element={<Services />} />
+                <Route path="services/:serviceId/order" element={<OrderCreate />} />
                 <Route path="services/:serviceId" element={<ServiceDetails />} />
                 <Route path="orders" element={<Orders />} />
+                <Route path="orders/:orderId" element={<OrderDetails />} />
                 <Route path="documents" element={<Documents />} />
                 <Route path="funds-business" element={<FundsBusiness />} />
                 <Route path="firms" element={<FirmList />} />
-                <Route path="firms/new" element={<FirmForm mode="create" />} />
-                <Route path="firms/:firmId/edit" element={<FirmForm mode="edit" />} />
                 <Route path="firms/:firmId" element={<FirmDetails />} />
                 <Route path="profile" element={<Profile />} />
-                <Route path="application/gst-registration/:orderId" element={<GSTRegistration />} />
               </Route>
 
               {/* 404 */}

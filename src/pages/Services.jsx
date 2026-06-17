@@ -5,8 +5,6 @@ import {
   Search,
   AlertCircle,
   ShoppingBag,
-  Eye,
-  Loader2,
   Tag,
   RefreshCw,
   Sparkles,
@@ -20,9 +18,6 @@ const formatCurrency = (amount) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(amount);
-
-const getApplicationPath = (serviceId, orderId) =>
-  `/application/${serviceId}/${orderId}`;
 
 const TABS = [
   { id: "All", label: "All Services" },
@@ -85,13 +80,7 @@ function ServiceImage({ src, alt, className }) {
   );
 }
 
-function ServiceCard({
-  service,
-  index,
-  onViewDetails,
-  onPurchase,
-  purchasing,
-}) {
+function ServiceCard({ service, onSelect }) {
   const hasDiscount = service.discount_value > 0;
 
   return (
@@ -99,7 +88,16 @@ function ServiceCard({
       variants={itemVariants}
       whileHover={{ y: -6 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-secondary shadow-soft transition-shadow hover:shadow-xl"
+      onClick={() => onSelect(service.service_id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(service.service_id);
+        }
+      }}
+      role="link"
+      tabIndex={0}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-secondary shadow-soft transition-shadow hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-primary">
         {hasDiscount && (
@@ -153,30 +151,6 @@ function ServiceCard({
             </span>
           )}
         </p>
-
-        <div className="mt-auto flex gap-2 pt-4">
-          <button
-            type="button"
-            onClick={() => onViewDetails(service.service_id)}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-primary px-3 py-2.5 text-xs font-semibold text-primary-foreground transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
-          >
-            <Eye size={14} />
-            Details
-          </button>
-          <button
-            type="button"
-            onClick={() => onPurchase(service)}
-            disabled={purchasing}
-            className="inline-flex flex-[1.4] items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {purchasing ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <ShoppingBag size={14} />
-            )}
-            Buy Now
-          </button>
-        </div>
       </div>
     </motion.article>
   );
@@ -191,7 +165,6 @@ export default function Services() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [purchasingId, setPurchasingId] = useState(null);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -224,34 +197,7 @@ export default function Services() {
     fetchServices();
   }, [fetchServices]);
 
-  const handlePurchase = async (service) => {
-    setPurchasingId(service.service_id);
-    const toastId = toast.loading(`Processing ${service.name}…`);
-
-    try {
-      const response = await apiCall("/orders/create", "POST", {
-        service_id: service.service_id,
-      });
-      const body = await response.json();
-
-      if (response.ok && body.success && body.data?.order_id) {
-        toast.dismiss(toastId);
-        toast.success("Order placed! Complete your application.");
-        navigate(getApplicationPath(service.service_id, body.data.order_id));
-        return;
-      }
-
-      throw new Error(body.message || "Failed to create order.");
-    } catch (err) {
-      console.error("Purchase failed:", err);
-      toast.dismiss(toastId);
-      toast.error(err.message || "Could not start purchase. Please try again.");
-    } finally {
-      setPurchasingId(null);
-    }
-  };
-
-  const handleViewDetails = (serviceId) => {
+  const handleSelectService = (serviceId) => {
     navigate(`/services/${serviceId}`);
   };
 
@@ -274,8 +220,8 @@ export default function Services() {
             Our Services
           </h1>
           <p className="mt-1 sm:mt-2 max-w-2xl text-sm sm:text-base text-secondary-foreground">
-            Browse and purchase registration and compliance services. Each
-            service links to its application form after checkout.
+            Browse and order registration and compliance services. Open a
+            service to view details and place your order.
           </p>
         </div>
 
@@ -368,14 +314,11 @@ export default function Services() {
           animate="visible"
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
         >
-          {services.map((service, index) => (
+          {services.map((service) => (
             <ServiceCard
               key={service.service_id}
               service={service}
-              index={index}
-              onViewDetails={handleViewDetails}
-              onPurchase={handlePurchase}
-              purchasing={purchasingId === service.service_id}
+              onSelect={handleSelectService}
             />
           ))}
         </motion.div>

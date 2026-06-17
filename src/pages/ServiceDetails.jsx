@@ -12,10 +12,12 @@ import {
   CheckCircle2,
   Clock,
   Info,
+  ClipboardList,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
 import { DetailSkeleton } from "../components/SkeletonComponent";
+import FirmFormModal from "../components/firms/FirmFormModal";
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("en-IN", {
@@ -32,8 +34,30 @@ const formatBytes = (bytes) => {
   return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
-const getApplicationPath = (serviceId, orderId) =>
-  `/application/${serviceId}/${orderId}`;
+const FIELD_LABELS = {
+  mobile: "Mobile Number",
+  email: "Email Address",
+  pan_no: "PAN Number",
+  aadhaar_no: "Aadhaar Number",
+};
+
+const formatFieldLabel = (key) =>
+  FIELD_LABELS[key] ||
+  key
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const getRequiredFields = (fields) => {
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) return [];
+
+  return Object.entries(fields)
+    .filter(([, required]) => Boolean(required))
+    .map(([key]) => ({ key, label: formatFieldLabel(key) }));
+};
+
+const getServiceDocuments = (service) =>
+  service?.documents ?? service?.required_documents ?? [];
 
 function ServiceImage({ src, alt, className }) {
   const [failed, setFailed] = useState(false);
@@ -66,7 +90,8 @@ export default function ServiceDetails() {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [purchasing, setPurchasing] = useState(false);
+  const [ordering, setOrdering] = useState(false);
+  const [firmModalOpen, setFirmModalOpen] = useState(false);
 
   const fetchDetails = useCallback(async () => {
     setLoading(true);
@@ -96,32 +121,37 @@ export default function ServiceDetails() {
     fetchDetails();
   }, [fetchDetails]);
 
-  const handlePurchase = async () => {
+  const handleOrder = async () => {
     if (!service) return;
-    setPurchasing(true);
-    const toastId = toast.loading(`Processing ${service.name}…`);
+    setOrdering(true);
 
     try {
-      const response = await apiCall("/orders/create", "POST", {
-        service_id: service.service_id,
-      });
+      const response = await apiCall("/firms/list?page_no=1&limit=1");
       const body = await response.json();
 
-      if (response.ok && body.success && body.data?.order_id) {
-        toast.dismiss(toastId);
-        toast.success("Order placed! Complete your application.");
-        navigate(getApplicationPath(service.service_id, body.data.order_id));
+      if (!response.ok || !body.success) {
+        throw new Error(body.message || "Failed to check firms");
+      }
+
+      const firmCount = body.data?.pagination?.total ?? 0;
+
+      if (firmCount === 0) {
+        setFirmModalOpen(true);
         return;
       }
 
-      throw new Error(body.message || "Failed to create order.");
+      navigate(`/services/${service.service_id}/order`);
     } catch (err) {
-      console.error("Purchase failed:", err);
-      toast.dismiss(toastId);
-      toast.error(err.message || "Could not start purchase. Please try again.");
+      console.error("Order check failed:", err);
+      toast.error(err.message || "Could not start order. Please try again.");
     } finally {
-      setPurchasing(false);
+      setOrdering(false);
     }
+  };
+
+  const handleFirmCreated = () => {
+    setFirmModalOpen(false);
+    navigate(`/services/${service.service_id}/order`);
   };
 
   if (loading) {
@@ -159,6 +189,8 @@ export default function ServiceDetails() {
       : service.discount_type
         ? `${service.discount_type} discount`
         : `${service.discount_percentage}% discount`;
+  const requiredFields = getRequiredFields(service.fields);
+  const documents = getServiceDocuments(service);
 
   return (
     <motion.div
@@ -259,23 +291,74 @@ export default function ServiceDetails() {
 
             <button
               type="button"
-              onClick={handlePurchase}
-              disabled={purchasing}
+              onClick={handleOrder}
+              disabled={ordering}
               className="mt-auto pt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {purchasing ? (
+              {ordering ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <ShoppingBag size={18} />
               )}
-              Buy Now
+              Order Now
             </button>
           </div>
         </div>
       </div>
 
-      {/* Required Documents */}
+      {/* Description */}
       <div className="mt-10 rounded-2xl border border-border bg-secondary p-5 sm:p-8 shadow-soft">
+        <div className="mb-3 flex items-center gap-2">
+          <Info size={20} className="text-indigo-600" />
+          <h2 className="text-lg font-bold text-primary-foreground">
+            About this service
+          </h2>
+        </div>
+        <p className="text-sm leading-relaxed text-secondary-foreground sm:text-base">
+          {service.description || "No description available for this service."}
+        </p>
+      </div>
+
+      {/* Required Fields */}
+      <div className="mt-6 rounded-2xl border border-border bg-secondary p-5 sm:p-8 shadow-soft">
+        <div className="mb-5 flex items-center gap-2">
+          <ClipboardList size={20} className="text-indigo-600" />
+          <h2 className="text-lg font-bold text-primary-foreground">
+            Required Fields
+          </h2>
+        </div>
+
+        {requiredFields.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {requiredFields.map((field) => (
+              <div
+                key={field.key}
+                className="flex items-center gap-3 rounded-xl border border-border bg-primary p-4"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+                  <CheckCircle2 size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-primary-foreground">
+                    {field.label}
+                  </p>
+                  <p className="text-[11px] text-secondary-foreground">
+                    Required for application
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-xl bg-primary/50 p-4 text-sm text-secondary-foreground">
+            <Info size={16} className="text-indigo-500" />
+            No additional fields required for this service.
+          </div>
+        )}
+      </div>
+
+      {/* Required Documents */}
+      <div className="mt-6 rounded-2xl border border-border bg-secondary p-5 sm:p-8 shadow-soft">
         <div className="mb-5 flex items-center gap-2">
           <FileText size={20} className="text-indigo-600" />
           <h2 className="text-lg font-bold text-primary-foreground">
@@ -283,9 +366,9 @@ export default function ServiceDetails() {
           </h2>
         </div>
 
-        {service.required_documents?.length > 0 ? (
+        {documents.length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            {service.required_documents.map((doc) => (
+            {documents.map((doc) => (
               <div
                 key={doc.required_id}
                 className="rounded-xl border border-border bg-primary p-4 transition hover:border-indigo-200 hover:shadow-sm"
@@ -334,18 +417,13 @@ export default function ServiceDetails() {
         )}
       </div>
 
-      {/* Description */}
-      <div className="mt-6 rounded-2xl border border-border bg-secondary p-5 sm:p-8 shadow-soft">
-        <div className="mb-3 flex items-center gap-2">
-          <Info size={20} className="text-indigo-600" />
-          <h2 className="text-lg font-bold text-primary-foreground">
-            About this service
-          </h2>
-        </div>
-        <p className="text-sm leading-relaxed text-secondary-foreground sm:text-base">
-          {service.description || "No description available for this service."}
-        </p>
-      </div>
+      <FirmFormModal
+        isOpen={firmModalOpen}
+        onClose={() => setFirmModalOpen(false)}
+        mode="create"
+        description="You need at least one firm before placing an order."
+        onSuccess={handleFirmCreated}
+      />
     </motion.div>
   );
 }

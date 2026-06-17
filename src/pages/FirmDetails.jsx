@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
+import FirmFormModal from "../components/firms/FirmFormModal";
 
 const FIRM_TYPE_LABELS = {
   proprietorship: "Proprietorship",
@@ -59,6 +60,7 @@ export default function FirmDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fetchDetails = useCallback(async () => {
     setLoading(true);
@@ -109,7 +111,7 @@ export default function FirmDetails() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl py-12 flex justify-center">
+      <div className="mx-auto py-12 flex justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
@@ -117,7 +119,7 @@ export default function FirmDetails() {
 
   if (error || !firm) {
     return (
-      <div className="mx-auto max-w-4xl py-8 px-4 text-center">
+      <div className="mx-auto py-8 px-4 text-center">
         <AlertCircle className="mx-auto mb-4 h-10 w-10 text-red-500" />
         <p className="text-red-500 mb-4">{error || "Firm not found."}</p>
         <button
@@ -135,7 +137,7 @@ export default function FirmDetails() {
 
   return (
     <motion.div
-      className="mx-auto max-w-4xl py-6 sm:py-8 px-2 sm:px-4"
+      className="mx-auto py-4 sm:py-6"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -163,13 +165,14 @@ export default function FirmDetails() {
         </div>
 
         <div className="flex gap-3">
-          <Link
-            to={`/firms/${firmId}/edit`}
+          <button
+            type="button"
+            onClick={() => setEditModalOpen(true)}
             className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:border-indigo-500/40 transition"
           >
             <Pencil size={16} />
             Edit
-          </Link>
+          </button>
           <button
             onClick={handleDelete}
             disabled={deleting}
@@ -198,6 +201,17 @@ export default function FirmDetails() {
           <DetailRow label="Last Updated" value={formatDate(firm.modify_date)} />
         </div>
       </div>
+
+      <FirmFormModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        mode="edit"
+        firmId={firmId}
+        onSuccess={() => {
+          setEditModalOpen(false);
+          fetchDetails();
+        }}
+      />
     </motion.div>
   );
 }
