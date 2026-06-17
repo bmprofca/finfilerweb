@@ -13,6 +13,8 @@ import {
   Clock,
   Info,
   ClipboardList,
+  Receipt,
+  IndianRupee,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
@@ -79,6 +81,130 @@ function ServiceImage({ src, alt, className }) {
       className={className}
       onError={() => setFailed(true)}
     />
+  );
+}
+
+function PriceRow({ label, value, muted, accent }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
+      <span
+        className={
+          muted ? "text-secondary-foreground" : "font-medium text-primary-foreground"
+        }
+      >
+        {label}
+      </span>
+      <span
+        className={`shrink-0 whitespace-nowrap tabular-nums ${
+          accent
+            ? "font-semibold text-emerald-600"
+            : muted
+              ? "text-secondary-foreground"
+              : "font-semibold text-primary-foreground"
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function PricingDetails({ service, hasDiscount, discountLabel, ordering, onOrder }) {
+  return (
+    <div className="mt-5 flex flex-1 flex-col rounded-2xl border border-border bg-secondary p-5 shadow-soft sm:p-6">
+      <div className="mb-5 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+          <Receipt size={16} />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-primary-foreground sm:text-lg">
+            Pricing Details
+          </h2>
+          <p className="text-xs text-secondary-foreground">
+            Transparent fee breakdown with GST included
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 p-5 text-white shadow-md shadow-indigo-200/40 dark:shadow-none">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-indigo-100">
+              Total payable
+            </p>
+            <p className="mt-1 text-3xl font-bold tabular-nums sm:text-4xl">
+              {formatCurrency(service.fees)}
+            </p>
+          </div>
+          {hasDiscount && (
+            <div className="text-right">
+              <p className="text-[11px] font-medium text-indigo-200">Before discount</p>
+              <p className="text-sm tabular-nums text-indigo-100 line-through">
+                {formatCurrency(service.total_fees)}
+              </p>
+            </div>
+          )}
+        </div>
+        {hasDiscount && (
+          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
+            <Tag size={11} />
+            You save {formatCurrency(service.discount_value)}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 rounded-xl border border-border bg-primary/60 px-4">
+        <PriceRow
+          label="Base price"
+          value={formatCurrency(service.base_price)}
+          muted
+        />
+        <div className="border-t border-dashed border-border">
+          <PriceRow
+            label={`GST (${service.tax_rate ?? 0}%)`}
+            value={`+${formatCurrency(service.tax_value)}`}
+            muted
+          />
+        </div>
+        <div className="border-t border-dashed border-border">
+          <PriceRow label="Subtotal" value={formatCurrency(service.total_fees)} />
+        </div>
+        {hasDiscount && (
+          <div className="border-t border-dashed border-border">
+            <PriceRow
+              label={`Discount (${discountLabel})`}
+              value={`-${formatCurrency(service.discount_value)}`}
+              accent
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-primary px-4 py-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+          <IndianRupee size={16} />
+        </div>
+        <p className="text-xs leading-relaxed text-secondary-foreground">
+          {hasDiscount
+            ? "Discount applied automatically at checkout. Final amount shown above."
+            : "All taxes included. No hidden charges at checkout."}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={onOrder}
+        disabled={ordering}
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-none"
+      >
+        {ordering ? (
+          <Loader2 size={18} className="animate-spin" />
+        ) : (
+          <ShoppingBag size={18} />
+        )}
+        Order Now
+      </button>
+    </div>
   );
 }
 
@@ -185,10 +311,10 @@ export default function ServiceDetails() {
   const hasDiscount = service.discount_value > 0;
   const discountLabel =
     service.discount_type === "percentage"
-      ? `${service.discount_percentage}% discount`
-      : service.discount_type
-        ? `${service.discount_type} discount`
-        : `${service.discount_percentage}% discount`;
+      ? `${service.discount_percentage}%`
+      : service.discount_type && service.discount_type !== "not applicable"
+        ? service.discount_type
+        : `${service.discount_percentage}%`;
   const requiredFields = getRequiredFields(service.fields);
   const documents = getServiceDocuments(service);
 
@@ -239,70 +365,13 @@ export default function ServiceDetails() {
             {service.name}
           </h1>
 
-          {/* Pricing */}
-          <div className="mt-5 flex flex-1 flex-col rounded-2xl border border-border bg-secondary p-5 shadow-soft">
-            <h2 className="mb-3 text-sm font-bold text-primary-foreground">
-              Pricing Details
-            </h2>
-
-            <div className="flex flex-wrap items-end gap-3">
-              <span className="text-3xl font-bold text-indigo-600">
-                {formatCurrency(service.fees)}
-              </span>
-              {hasDiscount && (
-                <span className="text-lg text-slate-400 line-through">
-                  {formatCurrency(service.total_fees)}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-secondary-foreground">Base Price</span>
-                <span className="font-semibold text-primary-foreground">
-                  {formatCurrency(service.base_price)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-secondary-foreground">
-                  Tax ({service.tax_rate}%)
-                </span>
-                <span className="font-semibold text-primary-foreground">
-                  +{formatCurrency(service.tax_value)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-secondary-foreground">Subtotal</span>
-                <span className="font-semibold text-primary-foreground">
-                  {formatCurrency(service.total_fees)}
-                </span>
-              </div>
-              {hasDiscount && (
-                <div className="flex justify-between font-semibold text-emerald-600">
-                  <span className="capitalize">Discount ({discountLabel})</span>
-                  <span>-{formatCurrency(service.discount_value)}</span>
-                </div>
-              )}
-              <div className="flex justify-between border-t border-border pt-2.5 text-base font-bold text-indigo-600">
-                <span>Total Payable</span>
-                <span>{formatCurrency(service.fees)}</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleOrder}
-              disabled={ordering}
-              className="mt-auto pt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {ordering ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <ShoppingBag size={18} />
-              )}
-              Order Now
-            </button>
-          </div>
+          <PricingDetails
+            service={service}
+            hasDiscount={hasDiscount}
+            discountLabel={discountLabel}
+            ordering={ordering}
+            onOrder={handleOrder}
+          />
         </div>
       </div>
 

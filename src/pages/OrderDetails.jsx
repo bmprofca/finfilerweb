@@ -122,7 +122,7 @@ function PriceLine({ label, value, accent, muted }) {
         {label}
       </span>
       <span
-        className={`shrink-0 tabular-nums ${
+        className={`shrink-0 whitespace-nowrap tabular-nums ${
           accent
             ? "font-semibold text-emerald-600"
             : muted
@@ -145,17 +145,16 @@ const formatPaymentStatus = (status) => {
 };
 
 const canPayForOrder = (order) => {
+  if (order?.can_pay !== undefined) {
+    return Boolean(order.can_pay);
+  }
+
   const remaining =
     order?.remaining_amount !== undefined
       ? Number(order.remaining_amount)
       : Math.max(0, Number(order?.fees || 0) - Number(order?.paid_amount || 0));
 
-  return (
-    !order?.is_paid &&
-    order?.status !== "cancelled" &&
-    order?.status !== "completed" &&
-    remaining > 0
-  );
+  return order?.status !== "cancelled" && remaining > 0;
 };
 
 const formatPaymentDate = (value) => {
@@ -608,8 +607,8 @@ export default function OrderDetails() {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
+        <div className="space-y-6 lg:col-span-7">
           {order.fields?.length > 0 && (
             <SectionCard icon={User} title="Submitted Information">
               <div className="grid gap-3 sm:grid-cols-2">
@@ -676,7 +675,7 @@ export default function OrderDetails() {
           )}
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-5">
           <PaymentSummary
             order={order}
             onOpenPayment={() => setPaymentModalOpen(true)}

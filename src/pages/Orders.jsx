@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ClipboardList,
-  Clock,
-  CheckCircle2,
   AlertCircle,
   ChevronRight,
   Search,
   Loader2,
   RefreshCw,
+  Building2,
+  Calendar,
+  CreditCard,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
@@ -20,7 +21,7 @@ const formatCurrency = (amount) =>
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(amount ?? 0);
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -37,32 +38,32 @@ const STATUS_CONFIG = {
   created: {
     label: "Created",
     color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-    dot: "bg-slate-400",
+    ring: "ring-slate-200 dark:ring-slate-700",
   },
   "in process": {
-    label: "In Progress",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-    dot: "bg-blue-500",
+    label: "In Process",
+    color: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    ring: "ring-blue-100 dark:ring-blue-900",
   },
   "pending from client": {
-    label: "Pending Review",
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    dot: "bg-amber-500",
+    label: "Pending (Client)",
+    color: "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+    ring: "ring-amber-100 dark:ring-amber-900",
   },
   "pending from department": {
-    label: "Pending Review",
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-    dot: "bg-amber-500",
+    label: "Pending (Dept)",
+    color: "bg-orange-50 text-orange-800 dark:bg-orange-950 dark:text-orange-300",
+    ring: "ring-orange-100 dark:ring-orange-900",
   },
   completed: {
     label: "Completed",
-    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-    dot: "bg-emerald-500",
+    color: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    ring: "ring-emerald-100 dark:ring-emerald-900",
   },
   cancelled: {
     label: "Cancelled",
-    color: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
-    dot: "bg-red-400",
+    color: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+    ring: "ring-red-100 dark:ring-red-900",
   },
 };
 
@@ -70,76 +71,68 @@ const getStatusConfig = (status) =>
   STATUS_CONFIG[status] || {
     label: status || "Unknown",
     color: "bg-slate-100 text-slate-700",
-    dot: "bg-slate-400",
+    ring: "ring-slate-200",
   };
 
 const FILTER_TABS = [
   { id: "all", label: "All", status: "" },
-  { id: "in_process", label: "In Progress", status: "in process" },
+  { id: "created", label: "Created", status: "created" },
+  { id: "in_process", label: "In Process", status: "in process" },
+  { id: "pending_client", label: "Pending (Client)", status: "pending from client" },
+  { id: "pending_dept", label: "Pending (Dept)", status: "pending from department" },
   { id: "completed", label: "Completed", status: "completed" },
-  { id: "pending", label: "Pending Review", status: "pending" },
-];
-
-const SUMMARY_CARDS = [
-  {
-    key: "total",
-    label: "Total Orders",
-    icon: ClipboardList,
-    iconWrap: "bg-indigo-100 text-indigo-600",
-    valueClass: "text-indigo-700",
-    cardClass: "border-indigo-100 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/40 dark:to-secondary",
-  },
-  {
-    key: "in_process",
-    label: "In Progress",
-    icon: Clock,
-    iconWrap: "bg-blue-100 text-blue-600",
-    valueClass: "text-blue-700",
-    cardClass: "border-blue-100 bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/40 dark:to-secondary",
-  },
-  {
-    key: "completed",
-    label: "Completed",
-    icon: CheckCircle2,
-    iconWrap: "bg-emerald-100 text-emerald-600",
-    valueClass: "text-emerald-700",
-    cardClass: "border-emerald-100 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/40 dark:to-secondary",
-  },
+  { id: "cancelled", label: "Cancelled", status: "cancelled" },
 ];
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
 };
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 16, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 },
+    transition: { type: "spring", stiffness: 320, damping: 28 },
   },
 };
 
 function OrderListSkeleton() {
   return (
-    <ul className="divide-y divide-border">
+    <div className="grid gap-3 p-4 sm:gap-4 sm:p-5">
       {Array.from({ length: 5 }).map((_, index) => (
-        <li key={index} className="flex animate-pulse flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div className="flex items-start gap-4">
-            <div className="mt-2 h-2.5 w-2.5 rounded-full bg-border" />
-            <div className="space-y-2">
-              <div className="h-4 w-48 rounded bg-border" />
-              <div className="h-3 w-64 rounded bg-border" />
+        <div
+          key={index}
+          className="animate-pulse rounded-2xl border border-border bg-primary/40 p-4 sm:p-5"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="h-12 w-12 shrink-0 rounded-xl bg-border" />
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-40 rounded-md bg-border sm:w-48" />
+                  <div className="h-5 w-20 rounded-full bg-border" />
+                </div>
+                <div className="h-3 w-32 rounded-md bg-border" />
+                <div className="flex gap-3">
+                  <div className="h-3 w-24 rounded-md bg-border" />
+                  <div className="h-3 w-28 rounded-md bg-border" />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-t border-border pt-4 sm:border-0 sm:pt-0">
+              <div className="space-y-2">
+                <div className="h-3 w-16 rounded-md bg-border" />
+                <div className="h-6 w-24 rounded-md bg-border" />
+                <div className="h-3 w-20 rounded-md bg-border" />
+              </div>
+              <div className="h-10 w-10 rounded-full bg-border" />
             </div>
           </div>
-          <div className="flex items-center gap-4 pl-5 sm:pl-0">
-            <div className="h-6 w-24 rounded-full bg-border" />
-            <div className="h-5 w-16 rounded bg-border" />
-          </div>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -152,20 +145,13 @@ export default function Orders() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
-  const [summary, setSummary] = useState({ total: 0, in_process: 0, completed: 0, pending: 0 });
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   useEffect(() => {
     setPageNo(1);
-  }, [debouncedSearch, activeFilter]);
+  }, [searchQuery, activeFilter]);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -176,7 +162,7 @@ export default function Orders() {
       const payload = {
         page_no: pageNo,
         limit,
-        search: debouncedSearch || undefined,
+        search: searchQuery.trim() || undefined,
         status: activeTab.status || undefined,
       };
 
@@ -186,7 +172,6 @@ export default function Orders() {
       if (response.ok && body.success && body.data) {
         setOrders(body.data.orders || []);
         setTotal(body.data.pagination?.total || 0);
-        setSummary(body.data.summary || { total: 0, in_process: 0, completed: 0, pending: 0 });
       } else {
         throw new Error(body.message || "Failed to load orders");
       }
@@ -196,19 +181,14 @@ export default function Orders() {
     } finally {
       setLoading(false);
     }
-  }, [pageNo, limit, debouncedSearch, activeFilter, toast]);
+  }, [pageNo, limit, searchQuery, activeFilter, toast]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
   return (
-    <motion.div
-      className="mx-auto"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <motion.div className="mx-auto" variants={containerVariants} initial="hidden" animate="visible">
       <motion.div
         variants={itemVariants}
         className="mb-6 flex flex-col justify-between gap-4 sm:mb-8 sm:flex-row sm:items-end"
@@ -217,12 +197,12 @@ export default function Orders() {
           <h1 className="font-display text-2xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
             My Orders
           </h1>
-          <p className="mt-1 text-sm text-secondary-foreground sm:mt-2 sm:text-lg">
-            Track all your service orders and their status.
+          <p className="mt-1 text-sm text-secondary-foreground sm:mt-2 sm:text-base">
+            Track your service orders, payments, and status updates.
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <div className="relative flex-1 sm:w-64">
+          <div className="relative flex-1 sm:w-72">
             <Search
               size={16}
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-secondary-foreground"
@@ -237,8 +217,8 @@ export default function Orders() {
           </div>
           <motion.button
             type="button"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={fetchOrders}
             disabled={loading}
             className="flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary disabled:opacity-60"
@@ -249,35 +229,16 @@ export default function Orders() {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="mb-6 grid grid-cols-3 gap-3 sm:mb-8 sm:gap-5">
-        {SUMMARY_CARDS.map(({ key, label, icon: Icon, iconWrap, valueClass, cardClass }) => (
-          <div
-            key={key}
-            className={`rounded-2xl border p-3 text-center shadow-soft sm:p-5 ${cardClass}`}
-          >
-            <div
-              className={`mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${iconWrap}`}
-            >
-              <Icon size={18} />
-            </div>
-            <p className={`text-xl font-bold sm:text-3xl ${valueClass}`}>
-              {loading && orders.length === 0 ? "—" : summary[key] ?? 0}
-            </p>
-            <p className="mt-0.5 text-xs text-secondary-foreground">{label}</p>
-          </div>
-        ))}
-      </motion.div>
-
       <motion.div variants={itemVariants} className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {FILTER_TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveFilter(tab.id)}
-            className={`flex-shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+            className={`flex-shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all sm:text-sm ${
               activeFilter === tab.id
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
-                : "border border-border bg-secondary text-secondary-foreground hover:bg-primary"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200/60"
+                : "border border-border bg-secondary text-secondary-foreground hover:border-indigo-200 hover:text-indigo-600"
             }`}
           >
             {tab.label}
@@ -289,7 +250,7 @@ export default function Orders() {
         variants={itemVariants}
         className="overflow-hidden rounded-2xl border border-border bg-secondary shadow-soft sm:rounded-3xl"
       >
-        {loading && orders.length === 0 ? (
+        {loading ? (
           <OrderListSkeleton />
         ) : error ? (
           <div className="py-16 text-center">
@@ -298,28 +259,26 @@ export default function Orders() {
           </div>
         ) : orders.length === 0 ? (
           <div className="py-16 text-center">
-            <AlertCircle className="mx-auto mb-3 text-slate-300" size={40} />
-            <p className="font-medium text-secondary-foreground">No orders found for this filter.</p>
+            <ClipboardList className="mx-auto mb-3 text-slate-300" size={40} />
+            <p className="font-medium text-secondary-foreground">No orders found.</p>
+            <p className="mt-1 text-sm text-secondary-foreground/80">
+              Try a different filter or search term.
+            </p>
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <div className="grid gap-3 p-4 sm:gap-4 sm:p-5">
             {orders.map((order, index) => {
               const statusConfig = getStatusConfig(order.status);
               const displayTitle = order.name || order.service_name || "Untitled Order";
-              const metaParts = [
-                order.order_id,
-                formatDate(order.create_date),
-                order.firm_name ? `Firm: ${order.firm_name}` : null,
-                `Staff: ${order.assigned_staff || "Unassigned"}`,
-              ].filter(Boolean);
+              const remaining = Number(order.remaining_amount) || 0;
+              const showDue = order.can_pay && remaining > 0;
 
               return (
-                <motion.li
+                <motion.article
                   key={order.order_id}
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.06 }}
-                  whileHover={{ backgroundColor: "rgba(248,250,252,0.6)" }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04 }}
                   onClick={() => navigate(`/orders/${order.order_id}`)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -329,35 +288,75 @@ export default function Orders() {
                   }}
                   role="button"
                   tabIndex={0}
-                  className="flex cursor-pointer flex-col justify-between gap-3 p-4 transition-colors sm:flex-row sm:items-center sm:p-5"
+                  className="group cursor-pointer rounded-2xl border border-border bg-primary/50 p-4 transition hover:border-indigo-200 hover:bg-primary hover:shadow-md sm:p-5"
                 >
-                  <div className="flex items-start gap-3 sm:items-center sm:gap-4">
-                    <div className="mt-0.5 sm:mt-0">
-                      <span className={`mt-1.5 inline-block h-2.5 w-2.5 rounded-full ${statusConfig.dot}`} />
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 ring-1 ring-indigo-500/15 transition group-hover:bg-indigo-500/15">
+                        <ClipboardList size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="truncate text-base font-semibold text-primary-foreground">
+                            {displayTitle}
+                          </h2>
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset ${statusConfig.color} ${statusConfig.ring}`}
+                          >
+                            {statusConfig.label}
+                          </span>
+                        </div>
+                        {order.service_name && order.name && (
+                          <p className="mt-0.5 truncate text-sm text-indigo-600">
+                            {order.service_name}
+                          </p>
+                        )}
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-secondary-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar size={12} />
+                            {formatDate(order.create_date)}
+                          </span>
+                          {order.firm_name && (
+                            <span className="inline-flex items-center gap-1">
+                              <Building2 size={12} />
+                              {order.firm_name}
+                            </span>
+                          )}
+                          <span className="font-mono text-[11px] opacity-70">{order.order_id}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-primary-foreground sm:text-base">
-                        {displayTitle}
-                      </p>
-                      {order.service_name && order.name && (
-                        <p className="truncate text-xs text-indigo-600">{order.service_name}</p>
-                      )}
-                      <p className="text-xs text-slate-400">{metaParts.join(" · ")}</p>
+
+                    <div className="flex items-center justify-between gap-4 border-t border-border pt-4 sm:border-0 sm:pt-0">
+                      <div className="text-left sm:text-right">
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-secondary-foreground">
+                          Order value
+                        </p>
+                        <p className="text-lg font-bold tabular-nums text-primary-foreground">
+                          {formatCurrency(order.fees)}
+                        </p>
+                        {order.is_paid ? (
+                          <p className="mt-0.5 text-xs font-medium text-emerald-600">Fully paid</p>
+                        ) : showDue ? (
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+                            <CreditCard size={12} />
+                            Due {formatCurrency(remaining)}
+                          </p>
+                        ) : order.is_partially_paid ? (
+                          <p className="mt-0.5 text-xs text-secondary-foreground">
+                            Paid {formatCurrency(order.paid_amount)}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary text-slate-400 transition group-hover:border-indigo-200 group-hover:text-indigo-600">
+                        <ChevronRight size={18} />
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pl-5 sm:justify-end sm:pl-0">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${statusConfig.color}`}>
-                      {statusConfig.label}
-                    </span>
-                    <span className="min-w-[72px] text-right text-base font-bold text-primary-foreground">
-                      {formatCurrency(order.fees)}
-                    </span>
-                    <ChevronRight size={18} className="ml-2 flex-shrink-0 text-slate-300" />
-                  </div>
-                </motion.li>
+                </motion.article>
               );
             })}
-          </ul>
+          </div>
         )}
       </motion.div>
 

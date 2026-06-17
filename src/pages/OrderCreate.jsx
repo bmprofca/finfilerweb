@@ -15,6 +15,14 @@ import { apiCall, uploadFile } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
 import SelectField from "../components/common/SelectField";
 import FirmFormModal from "../components/firms/FirmFormModal";
+import OrderPaymentModal from "../components/orders/OrderPaymentModal";
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount ?? 0);
 
 const FIELD_LABELS = {
   mobile: "Mobile Number",
@@ -170,6 +178,8 @@ export default function OrderCreate() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [firmModalOpen, setFirmModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState(null);
 
   const [orderName, setOrderName] = useState("");
   const [notes, setNotes] = useState("");
@@ -558,8 +568,23 @@ export default function OrderCreate() {
       const body = await response.json();
 
       if (response.ok && body.success && body.data?.order_id) {
-        toast.success("Order placed successfully.", { id: toastId });
-        navigate("/orders");
+        const orderFees = Number(body.data.fees) || 0;
+        const orderId = body.data.order_id;
+
+        if (orderFees > 0) {
+          toast.dismiss(toastId);
+          setCreatedOrder({
+            order_id: orderId,
+            fees: orderFees,
+            paid_amount: 0,
+            remaining_amount: orderFees,
+            partial_payment_allowed: Boolean(body.data.partial_payment_allowed),
+          });
+          setPaymentModalOpen(true);
+        } else {
+          toast.success("Order placed successfully.", { id: toastId });
+          navigate(`/orders/${orderId}`);
+        }
         return;
       }
 
@@ -571,6 +596,29 @@ export default function OrderCreate() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handlePaymentModalClose = () => {
+    const orderId = createdOrder?.order_id;
+    setPaymentModalOpen(false);
+    setCreatedOrder(null);
+    navigate(orderId ? `/orders/${orderId}` : "/orders");
+  };
+
+  const handlePaymentSuccess = ({ isFullPayment, remainingAfter }) => {
+    const orderId = createdOrder?.order_id;
+
+    if (isFullPayment) {
+      toast.success("Payment successful. Your order is now fully paid.");
+    } else {
+      toast.success(
+        `Partial payment received. Remaining balance: ${formatCurrency(remainingAfter)}`,
+      );
+    }
+
+    setPaymentModalOpen(false);
+    setCreatedOrder(null);
+    navigate(orderId ? `/orders/${orderId}` : "/orders");
   };
 
   const handleFirmCreated = (firm) => {
@@ -910,6 +958,14 @@ export default function OrderCreate() {
         mode="create"
         description="You need at least one firm before placing an order."
         onSuccess={handleFirmCreated}
+      />
+
+      <OrderPaymentModal
+        isOpen={paymentModalOpen}
+        onClose={handlePaymentModalClose}
+        order={createdOrder}
+        onSuccess={handlePaymentSuccess}
+        showOrderCreatedSuccess
       />
     </>
   );

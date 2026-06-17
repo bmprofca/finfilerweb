@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CreditCard, Loader2, X } from "lucide-react";
+import { CreditCard, CheckCircle2, Loader2, X } from "lucide-react";
 import { payForOrder } from "../../utils/razorpay";
 
 const formatCurrency = (amount) =>
@@ -15,11 +15,17 @@ const parseAmount = (value) => {
   return Math.round(amount * 100) / 100;
 };
 
+const isPartialPaymentAllowed = (order) =>
+  order?.partial_payment_allowed === true ||
+  order?.partial_payment_allowed === 1 ||
+  order?.partial_payment_allowed === "1";
+
 export default function OrderPaymentModal({
   isOpen,
   onClose,
   order,
   onSuccess,
+  showOrderCreatedSuccess = false,
 }) {
   const [paymentType, setPaymentType] = useState("full");
   const [partialAmount, setPartialAmount] = useState("");
@@ -34,8 +40,11 @@ export default function OrderPaymentModal({
       : Math.max(0, totalFees - paidAmount);
 
   const fullAmount = remainingAmount;
+  const partialPaymentAllowed = isPartialPaymentAllowed(order);
   const selectedAmount =
-    paymentType === "full" ? fullAmount : parseAmount(partialAmount);
+    partialPaymentAllowed && paymentType === "partial"
+      ? parseAmount(partialAmount)
+      : fullAmount;
 
   useEffect(() => {
     if (!isOpen) {
@@ -46,11 +55,16 @@ export default function OrderPaymentModal({
       return;
     }
 
+    if (!isPartialPaymentAllowed(order)) {
+      setPaymentType("full");
+      setPartialAmount("");
+    }
+
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, order]);
 
   if (!isOpen || !order) return null;
 
@@ -136,6 +150,20 @@ export default function OrderPaymentModal({
         </div>
 
         <div className="space-y-5 px-5 py-5">
+          {showOrderCreatedSuccess && (
+            <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900 dark:bg-emerald-950/40">
+              <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  Order placed successfully
+                </p>
+                <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-400">
+                  Your order has been created. Complete payment below to confirm it.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-3 rounded-xl border border-border bg-primary/60 p-3 text-center">
             <div>
               <p className="text-[11px] uppercase tracking-wide text-secondary-foreground">Total</p>
@@ -157,45 +185,54 @@ export default function OrderPaymentModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setPaymentType("full");
-                setError("");
-              }}
-              disabled={paying}
-              className={`rounded-xl border px-4 py-3 text-left transition ${
-                paymentType === "full"
-                  ? "border-indigo-500 bg-indigo-500/10"
-                  : "border-border bg-primary hover:border-indigo-200"
-              }`}
-            >
-              <p className="text-sm font-semibold text-primary-foreground">Full payment</p>
+          {partialPaymentAllowed ? (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentType("full");
+                  setError("");
+                }}
+                disabled={paying}
+                className={`rounded-xl border px-4 py-3 text-left transition ${
+                  paymentType === "full"
+                    ? "border-indigo-500 bg-indigo-500/10"
+                    : "border-border bg-primary hover:border-indigo-200"
+                }`}
+              >
+                <p className="text-sm font-semibold text-primary-foreground">Full payment</p>
+                <p className="mt-1 text-xs text-secondary-foreground">
+                  Pay {formatCurrency(fullAmount)}
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentType("partial");
+                  setError("");
+                }}
+                disabled={paying}
+                className={`rounded-xl border px-4 py-3 text-left transition ${
+                  paymentType === "partial"
+                    ? "border-indigo-500 bg-indigo-500/10"
+                    : "border-border bg-primary hover:border-indigo-200"
+                }`}
+              >
+                <p className="text-sm font-semibold text-primary-foreground">Partial payment</p>
+                <p className="mt-1 text-xs text-secondary-foreground">Pay a custom amount</p>
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-500/5 px-4 py-3">
+              <p className="text-sm font-semibold text-primary-foreground">Full payment required</p>
               <p className="mt-1 text-xs text-secondary-foreground">
-                Pay {formatCurrency(fullAmount)}
+                This order must be paid in full. Pay {formatCurrency(fullAmount)} to continue.
               </p>
-            </button>
+            </div>
+          )}
 
-            <button
-              type="button"
-              onClick={() => {
-                setPaymentType("partial");
-                setError("");
-              }}
-              disabled={paying}
-              className={`rounded-xl border px-4 py-3 text-left transition ${
-                paymentType === "partial"
-                  ? "border-indigo-500 bg-indigo-500/10"
-                  : "border-border bg-primary hover:border-indigo-200"
-              }`}
-            >
-              <p className="text-sm font-semibold text-primary-foreground">Partial payment</p>
-              <p className="mt-1 text-xs text-secondary-foreground">Pay a custom amount</p>
-            </button>
-          </div>
-
-          {paymentType === "partial" && (
+          {partialPaymentAllowed && paymentType === "partial" && (
             <div>
               <label
                 htmlFor="partial-amount"
