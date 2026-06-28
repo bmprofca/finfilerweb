@@ -196,7 +196,7 @@ const Navbar = ({
                 </div>
                 <div>
                   <span className="text-xl font-bold text-primary-foreground tracking-tight">
-                    fin<span className="font-light text-indigo-500">filer</span>
+                    Fin<span className="font-light text-indigo-500">Filer</span>
                   </span>
                 </div>
               </button>
