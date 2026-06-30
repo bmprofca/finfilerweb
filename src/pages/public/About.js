@@ -3,6 +3,7 @@ import { Eye, Award, Sparkles } from 'lucide-react';
 import PageHeader from '../../components/public/WebsitePageHeader';
 import AnimatedSection from '../../components/public/AnimatedSection';
 import { staggerContainer, staggerItem, viewportOnce } from '../../utils/public/animations';
+import SEO from '../../components/public/SEO';
 
 const values = [
   {
@@ -25,6 +26,7 @@ const values = [
 function About() {
   return (
     <>
+      <SEO title="About Us | FinFiler" description="Learn about FinFiler, our values, and how we are simplifying financial compliance and taxation for Indian businesses and professionals." />
       <PageHeader
         label="About Us"
         title="About FinFiler"

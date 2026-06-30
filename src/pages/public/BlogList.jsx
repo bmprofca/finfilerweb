@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { apiCall, resolveMediaUrl } from "../../utils/apiCall";
+import SEO from "../../components/public/SEO";
 
 // ── Tag config (map by blog path/tag keyword) ────────
 function getTagMeta(blog) {
@@ -183,6 +184,7 @@ export default function BlogList() {
 
   return (
     <div className="py-8 max-w-7xl m-auto  min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
+      <SEO title="Blog | FinFiler" description="Read the latest articles, insights, and updates on taxation, compliance, and financial management in India." />
       {/* Section heading */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}

@@ -8,6 +8,7 @@ import AnimatedSection from '../../components/public/AnimatedSection';
 import { ServiceCardSkeleton } from '../../components/public/ServiceSkeleton';
 import { fetchServices } from '../../utils/public/api';
 import { staggerContainer, staggerItem, slideFromLeft, slideFromRight, viewportOnce } from '../../utils/public/animations';
+import SEO from '../../components/public/SEO';
 
 const stats = [
   { value: '10K+', label: 'Clients Served', icon: Users },
@@ -54,6 +55,10 @@ function Home() {
 
   return (
     <>
+      <SEO 
+        title="FinFiler | Expert Financial Compliance Services" 
+        description="Simplify GST registration, company incorporation, and tax filing. Join thousands of businesses in India relying on FinFiler for fast, expert compliance."
+      />
       <section className="hero">
         <div className="hero-bg">
           <motion.div

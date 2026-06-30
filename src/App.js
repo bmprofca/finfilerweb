@@ -41,11 +41,14 @@ import PublicGrievancePolicy from "./pages/public/GrievanceRedressalPolicy";
 import PublicBlogs from "./pages/public/BlogList";
 import PublicBlogDetail from "./pages/public/BlogDetail";
 
+import { HelmetProvider } from 'react-helmet-async';
+
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <ThemeProvider>
+    <HelmetProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
             <Routes>
@@ -106,7 +109,8 @@ function App() {
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 

@@ -1,6 +1,9 @@
+import SEO from '../../components/public/SEO';
+
 function RefundCancellationPolicy() {
   return (
     <>
+      <SEO title="Refund & Cancellation Policy | FinFiler" description="Read FinFiler's Refund and Cancellation Policy to understand our terms regarding service cancellations and refunds." />
           <p>
             This Refund and Cancellation Policy governs payments made for services provided by{' '}
             <strong>FinFiler Private Limited</strong> (&quot;FinFiler&quot;, &quot;Company&quot;, &quot;we&quot;,

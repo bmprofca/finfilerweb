@@ -1,6 +1,9 @@
+import SEO from '../../components/public/SEO';
+
 function DataDeletionPolicy() {
   return (
     <>
+      <SEO title="Data Deletion Policy | FinFiler" description="Learn how to request deletion of your personal data on FinFiler." />
           <p>
             This Data Deletion Policy explains how users of FinFiler may request deletion of their personal information
             and account data. This policy applies to the FinFiler mobile application, website (

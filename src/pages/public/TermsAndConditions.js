@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
+import { FileText, CheckCircle, AlertCircle, Scale, CreditCard, ShieldAlert } from 'lucide-react';
+import PageHeader from '../../components/public/WebsitePageHeader';
+import AnimatedSection from '../../components/public/AnimatedSection';
+import SEO from '../../components/public/SEO';
 
 function TermsAndConditions() {
   return (
     <>
+      <SEO title="Terms and Conditions | FinFiler" description="Read FinFiler's Terms and Conditions for using our platform and services." />
+      <div className="legal-page">
           <p>
             These Terms and Conditions (&quot;Terms&quot;) govern your access to and use of the FinFiler mobile
             application, website{' '}
@@ -312,6 +318,7 @@ function TermsAndConditions() {
             Website:{' '}
             <a href="https://finfiler.com" target="_blank" rel="noopener noreferrer">https://finfiler.com</a>
           </p>
+        </div>
     </>
   );
 }

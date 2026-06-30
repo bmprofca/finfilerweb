@@ -23,6 +23,7 @@ import {
   hasStoredAuth,
 } from '../../utils/public/format';
 import { staggerContainer, staggerItem } from '../../utils/public/animations';
+import SEO from '../../components/public/SEO';
 
 const formatBytes = (bytes) => {
   const value = Number(bytes);
@@ -202,6 +203,10 @@ function ServiceDetail() {
 
   return (
     <>
+      <SEO 
+        title={`${service.name} | FinFiler Services`} 
+        description={service.description ? service.description.substring(0, 150) + '...' : `Get expert help with ${service.name}. FinFiler provides quick and reliable processing.`} 
+      />
       <PageHeader
         label="Service Details"
         title={service.name}

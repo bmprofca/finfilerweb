@@ -2,28 +2,28 @@
 
 /* ── Design tokens ── */
 .app {
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
+  --color-primary: #3b82f6;      /* Vibrant blue */
+  --color-primary-dark: #1e40af; /* Deep blue */
   --color-primary-light: #eff6ff;
-  --color-accent: #10b981;
+  --color-accent: #10b981;       /* Emerald */
   --color-accent-light: #ecfdf5;
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --color-border: #e2e8f0;
-  --color-footer: #0f172a;
+  --color-bg: #f8fafc;           /* Very light slate */
+  --color-surface: rgba(255, 255, 255, 0.85); /* Slightly transparent surface */
+  --color-text: #0f172a;         /* Dark slate */
+  --color-text-muted: #475569;
+  --color-border: rgba(226, 232, 240, 0.8);
+  --color-footer: #020617;       /* Almost black for footer */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
-  --shadow-xl: 0 24px 60px rgba(15, 23, 42, 0.16);
+  --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  --shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
   --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
-  --container-max: 1140px;
+  --container-max: 1280px;
   --container-narrow: 760px;
 
   min-height: 100vh;
@@ -95,8 +95,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid transparent;
   transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
@@ -511,17 +512,20 @@
 
 .stat-item {
   background: var(--color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1.35rem 1rem;
   text-align: center;
   box-shadow: var(--shadow-md);
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 
 .stat-item:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
 .stat-icon {
@@ -658,6 +662,8 @@
 
 .service-card {
   background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 0;
@@ -670,7 +676,8 @@
 
 .service-card:hover {
   box-shadow: var(--shadow-lg);
-  border-color: #bfdbfe;
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-4px);
 }
 
 .service-card-body {
@@ -1070,7 +1077,8 @@
 
 /* ── Service detail page (redesign) ── */
 .detail-page {
-  max-width: 1120px;
+  max-width: 1280px;
+  margin-inline: auto;
 }
 
 .detail-page .back-link {
@@ -1472,17 +1480,19 @@
 }
 
 .why-card {
-  background: var(--color-bg);
+  background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.35rem;
+  padding: 1.5rem;
   transition: box-shadow 0.3s, border-color 0.3s, transform 0.3s;
 }
 
 .why-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: #bfdbfe;
-  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-4px);
 }
 
 .why-card-icon {
@@ -1520,10 +1530,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+  background: linear-gradient(135deg, #020617 0%, #1e40af 60%, #3b82f6 100%);
   color: #fff;
   border-radius: var(--radius-xl);
-  padding: 2.75rem 3rem;
+  padding: 3rem 4rem;
   box-shadow: var(--shadow-xl);
   position: relative;
   overflow: hidden;

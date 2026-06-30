@@ -1,6 +1,9 @@
+import SEO from '../../components/public/SEO';
+
 function Disclaimer() {
   return (
     <>
+      <SEO title="Disclaimer | FinFiler" description="Legal disclaimer for the use of FinFiler platform and services." />
           <p>
             This Disclaimer governs the use of the FinFiler mobile application, website (
             <a href="https://finfiler.com" target="_blank" rel="noopener noreferrer">https://finfiler.com</a>), client

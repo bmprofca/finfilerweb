@@ -15,6 +15,7 @@ import {
 import PageHeader from '../../components/public/WebsitePageHeader';
 import AnimatedSection from '../../components/public/AnimatedSection';
 import { staggerContainer, staggerItem, viewportOnce } from '../../utils/public/animations';
+import SEO from '../../components/public/SEO';
 
 const contactMethods = [
   {

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Clock, User, Share2 } from "lucide-react";
 import { apiCall, resolveMediaUrl } from "../../utils/apiCall";
+import SEO from "../../components/public/SEO";
 
 // ── TipTap / ProseMirror content renderer ────────────
 function renderNode(node) {
@@ -175,11 +177,17 @@ export default function BlogDetail() {
   const thumbnailUrl = resolveMediaUrl(blog.thumbnail);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
+    <>
+      <SEO 
+        title={`${blog.title} | FinFiler Blog`} 
+        description={blog.summary || (blog.content ? blog.content.substring(0, 150).replace(/<[^>]+>/g, '') + '...' : 'Read this article on FinFiler.')}
+        ogImage={thumbnailUrl}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="max-w-6xl min-h-[calc(100vh-4rem)] mx-auto py-9 px-4"
+      className="max-w-7xl min-h-[calc(100vh-4rem)] mx-auto py-9 px-4"
     >
       {/* ─── Header: "Details View" + Back Button ─── */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -244,5 +252,6 @@ export default function BlogDetail() {
         {renderNode(blog.content)}
       </article>
     </motion.div>
+    </>
   );
 }

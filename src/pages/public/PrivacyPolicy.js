@@ -1,6 +1,10 @@
+import SEO from '../../components/public/SEO';
+
 function PrivacyPolicy() {
   return (
     <>
+      <SEO title="Privacy Policy | FinFiler" description="Read FinFiler's Privacy Policy to understand how we collect, use, and protect your data." />
+      <div className="legal-page">
           <p>
             FinFiler Private Limited (&quot;FinFiler&quot;, &quot;Company&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;)
             operates the FinFiler mobile application, website{' '}
@@ -212,6 +216,7 @@ function PrivacyPolicy() {
             <strong>Website:</strong>{' '}
             <a href="https://finfiler.com" target="_blank" rel="noopener noreferrer">https://finfiler.com</a>
           </p>
+        </div>
     </>
   );
 }

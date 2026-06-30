@@ -3,6 +3,7 @@ import ServiceCard from '../../components/public/ServiceCard';
 import PageHeader from '../../components/public/WebsitePageHeader';
 import { ServiceCardSkeleton } from '../../components/public/ServiceSkeleton';
 import { fetchServices } from '../../utils/public/api';
+import SEO from '../../components/public/SEO';
 
 function Services() {
   const [services, setServices] = useState([]);
@@ -29,6 +30,7 @@ function Services() {
 
   return (
     <>
+      <SEO title="Our Services | FinFiler" description="Explore our comprehensive range of financial and compliance services, from GST registration to ITR filing and company incorporation." />
       <PageHeader
         label="Services"
         title="Our Services"

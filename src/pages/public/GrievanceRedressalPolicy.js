@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import SEO from '../../components/public/SEO';
 
 function GrievanceRedressalPolicy() {
   return (
     <>
+      <SEO title="Grievance Redressal Policy | FinFiler" description="FinFiler's Grievance Redressal Policy. We are committed to resolving your complaints and concerns promptly." />
           <p>
             This Grievance Redressal Policy outlines the process through which users, customers, and other stakeholders
             may raise complaints, concerns, disputes, or grievances relating to the services provided by{' '}
