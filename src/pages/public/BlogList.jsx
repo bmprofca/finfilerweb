@@ -151,7 +151,11 @@ export default function BlogList() {
     }
   }, [pagination.limit]);
 
+  const fetched = useRef(false);
+
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
     setLoading(true);
     fetchBlogs(1, false).finally(() => setLoading(false));
   }, [fetchBlogs]);

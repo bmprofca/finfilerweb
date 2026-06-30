@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { clientRoute } from '../../constants/routes';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Users, Layers, Star, Headphones, Zap, MessageCircle, Globe, ShieldCheck, ArrowRight } from 'lucide-react';
 import ServiceCard from '../../components/public/ServiceCard';
 import AnimatedSection from '../../components/public/AnimatedSection';
@@ -25,8 +25,12 @@ const whyItems = [
 function Home() {
   const [featuredServices, setFeaturedServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+
     const controller = new AbortController();
 
     fetchServices({ pageNo: 1, limit: 3 }, { signal: controller.signal })

@@ -123,7 +123,12 @@ export default function BlogDetail() {
     }
   }, [blog]); // re-run when blog loads so the ref is populated
 
+  const fetched = useRef(false);
+
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+
     if (!blogId) {
       setError("No blog path provided");
       setLoading(false);

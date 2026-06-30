@@ -165,7 +165,11 @@ function ServiceDetail() {
     }
   }, [serviceId]);
 
+  const fetched = useRef(false);
+
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
     loadService();
     return () => {
       if (abortControllerRef.current) {

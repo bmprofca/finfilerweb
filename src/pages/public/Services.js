@@ -36,7 +36,11 @@ function Services() {
     }
   }, []);
 
+  const fetched = useRef(false);
+
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
     loadServices();
     return () => {
       if (abortControllerRef.current) {
