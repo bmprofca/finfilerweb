@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,9 +6,6 @@ import {
   ShieldCheck, Zap, MessageCircle, Globe, Star
 } from 'lucide-react';
 import { clientRoute } from '../../constants/routes';
-import { fetchServices } from '../../utils/public/api';
-import ServiceCard from '../../components/public/ServiceCard';
-import { ServiceCardSkeleton } from '../../components/public/ServiceSkeleton';
 import SEO from '../../components/public/SEO';
 
 const personas = [
@@ -39,22 +36,8 @@ const staggerContainer = {
 };
 
 export default function Home() {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const fetched = useRef(false);
-
-  useEffect(() => {
-    if (fetched.current) return;
-    fetched.current = true;
-    
-    fetchServices({ pageNo: 1, limit: 3 })
-      .then(data => setServices(data.services || []))
-      .catch(() => setServices([]))
-      .finally(() => setLoading(false));
-  }, []);
-
   return (
-    <div className="bg-white min-h-screen font-sans text-slate-800 overflow-x-hidden">
+    <main className="bg-white min-h-screen font-sans text-slate-800 overflow-x-hidden">
       <SEO title="FinFiler | Modern Financial Compliance" description="Fast, colorful, and highly animated financial compliance platform." />
 
       {/* HERO SECTION */}
@@ -163,7 +146,7 @@ export default function Home() {
                         <Icon size={24} />
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-900 mb-1">{item.title}</h4>
+                        <h3 className="font-bold text-slate-900 mb-1">{item.title}</h3>
                         <p className="text-sm text-slate-600">{item.desc}</p>
                       </div>
                     </motion.div>
@@ -190,39 +173,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SERVICES PREVIEW */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl lg:text-5xl font-extrabold text-slate-900 mb-4">Our Services</h2>
-              <p className="text-lg text-slate-600">Everything you need, cleanly organized.</p>
-            </div>
-            <Link to="/services" className="hidden sm:flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-700">
-              View all <ArrowRight size={20} />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {loading ? (
-              Array.from({ length: 3 }).map((_, i) => <ServiceCardSkeleton key={i} />)
-            ) : (
-              services.map((service, i) => (
-                <motion.div key={service.service_id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                  <ServiceCard service={service} index={i} />
-                </motion.div>
-              ))
-            )}
-          </div>
-          
-          <div className="mt-10 sm:hidden text-center">
-            <Link to="/services" className="inline-flex items-center gap-2 text-indigo-600 font-bold">
-              View all services <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* CTA SECTION */}
       <section className="py-24 px-6 bg-white">
         <div className="max-w-5xl mx-auto bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[3rem] p-12 lg:p-20 text-center relative overflow-hidden shadow-2xl">
@@ -237,6 +187,6 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }
