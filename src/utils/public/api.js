@@ -43,3 +43,26 @@ export async function fetchServiceDetails(serviceId) {
 
   return body.data;
 }
+
+export async function fetchBlogs({ page = 1, limit = 10, search = '' } = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    search,
+  });
+  const response = await apiGet(`/blogs/list?${params.toString()}`);
+  const body = await response.json();
+
+  if (!response.ok || !body.success) {
+    throw new Error(body.message || 'Failed to load blogs');
+  }
+
+  return body.data;
+}
+
+export async function fetchBlogById(blogId) {
+  const data = await fetchBlogs({ page: 1, limit: 100 });
+  const blog = data.blogs?.find(b => b.blog_id === blogId);
+  if (!blog) throw new Error('Blog not found');
+  return blog;
+}

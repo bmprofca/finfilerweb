@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { fetchServices } from '../../utils/public/api';
 import ServiceCard from '../../components/public/ServiceCard';
@@ -10,8 +10,12 @@ export default function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+
     fetchServices({ pageNo: 1, limit: 50 })
       .then(data => setServices(data.services || []))
       .catch(() => setServices([]))

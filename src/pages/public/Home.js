@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -41,8 +41,12 @@ const staggerContainer = {
 export default function Home() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+    
     fetchServices({ pageNo: 1, limit: 3 })
       .then(data => setServices(data.services || []))
       .catch(() => setServices([]))
