@@ -15,7 +15,7 @@ export const resolveMediaUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-
+ 
   const serverOrigin = getServerOrigin();
 
   if (url.startsWith('/')) {
