@@ -16,6 +16,7 @@ import {
   ChevronRight,
   CreditCard,
   CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { downloadOrderDocument } from "../utils/documentDownload";
@@ -474,6 +475,52 @@ function MetaLink({ to, icon: Icon, label, value }) {
   );
 }
 
+function CancelOrderModal({ isOpen, onClose, onConfirm, isCancelling }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-secondary p-6 shadow-soft">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400">
+            <AlertCircle size={20} />
+          </div>
+          <h3 className="text-lg font-semibold text-primary-foreground">
+            Cancel this order?
+          </h3>
+        </div>
+        <p className="mt-3 text-sm text-secondary-foreground">
+          This action cannot be undone. Are you sure you want to cancel this
+          order?
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isCancelling}
+            className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-60"
+          >
+            Keep Order
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isCancelling}
+            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+          >
+            {isCancelling ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <XCircle size={16} />
+            )}
+            Yes, Cancel Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OrderDetails() {
   const { orderId } = useParams();
   const toast = useToast();
@@ -484,6 +531,8 @@ export default function OrderDetails() {
   const [downloadingId, setDownloadingId] = useState(null);
   const [downloadingPaymentId, setDownloadingPaymentId] = useState(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const fetchDetails = useCallback(async () => {
     setLoading(true);
@@ -583,6 +632,28 @@ export default function OrderDetails() {
     await fetchDetails();
   };
 
+  const handleCancelOrder = async () => {
+    setIsCancelling(true);
+    try {
+      const response = await apiCall("/orders/cancel", "POST", {
+        order_id: orderId,
+      });
+      const body = await response.json();
+
+      if (response.ok && body.success) {
+        toast.success(body.message || "Order cancelled successfully.");
+        setCancelModalOpen(false);
+        await fetchDetails();
+      } else {
+        throw new Error(body.message || "Failed to cancel order");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to cancel order.");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   return (
     <motion.div
       className="mx-auto max-w-6xl"
@@ -590,20 +661,33 @@ export default function OrderDetails() {
       animate={{ opacity: 1, y: 0 }}
     >
       <header className="mb-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
-            <ClipboardList size={22} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+              <ClipboardList size={22} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusColor(order.status)}`}
+              >
+                {formatStatusLabel(order.status)}
+              </span>
+              <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-primary-foreground sm:text-2xl">
+                {displayTitle}
+              </h1>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <span
-              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusColor(order.status)}`}
+
+          {order.can_cancel && (
+            <button
+              type="button"
+              onClick={() => setCancelModalOpen(true)}
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/40"
             >
-              {formatStatusLabel(order.status)}
-            </span>
-            <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-primary-foreground sm:text-2xl">
-              {displayTitle}
-            </h1>
-          </div>
+              <XCircle size={16} />
+              Cancel Order
+            </button>
+          )}
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -707,6 +791,13 @@ export default function OrderDetails() {
         onClose={() => setPaymentModalOpen(false)}
         order={order}
         onSuccess={handlePaymentSuccess}
+      />
+
+      <CancelOrderModal
+        isOpen={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
+        onConfirm={handleCancelOrder}
+        isCancelling={isCancelling}
       />
     </motion.div>
   );
