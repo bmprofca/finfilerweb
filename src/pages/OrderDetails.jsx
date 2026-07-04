@@ -94,6 +94,43 @@ function SectionCard({ icon: Icon, title, children, className = "" }) {
   );
 }
 
+function DocumentGrid({ documents, downloadingId, onDownload }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {documents.map((document) => (
+        <div
+          key={document.document_id}
+          className="flex items-center justify-between gap-3 rounded-xl border border-border bg-primary p-4 transition hover:border-indigo-200"
+        >
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-primary-foreground">
+              {document.document_name}
+            </p>
+            <p className="mt-0.5 text-xs text-secondary-foreground">
+              {formatBytes(document.size)}
+            </p>
+          </div>
+          {document.file_url && (
+            <button
+              type="button"
+              onClick={() => onDownload(document)}
+              disabled={downloadingId === document.document_id}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-indigo-600 transition hover:border-indigo-500/40 hover:bg-indigo-500/5 disabled:opacity-60"
+              title="Download document"
+            >
+              {downloadingId === document.document_id ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Download size={16} />
+              )}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PriceLine({ label, value, accent, muted }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
@@ -592,6 +629,12 @@ export default function OrderDetails() {
   }
 
   const displayTitle = order.name || order.service_name || "Untitled Order";
+  const inputDocuments = (order.documents || []).filter(
+    (document) => document.type !== "out",
+  );
+  const outputDocuments = (order.documents || []).filter(
+    (document) => document.type === "out",
+  );
 
   const handleDownload = async (fileDoc) => {
     setDownloadingId(fileDoc.document_id);
@@ -730,41 +773,44 @@ export default function OrderDetails() {
             </SectionCard>
           )}
 
-          {order.documents?.length > 0 && (
-            <SectionCard icon={FileText} title="Documents">
-              <div className="grid gap-3 sm:grid-cols-2">
-                {order.documents.map((document) => (
-                  <div
-                    key={document.document_id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-primary p-4 transition hover:border-indigo-200"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-primary-foreground">
-                        {document.document_name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-secondary-foreground">
-                        {formatBytes(document.size)}
-                      </p>
-                    </div>
-                    {document.file_url && (
-                      <button
-                        type="button"
-                        onClick={() => handleDownload(document)}
-                        disabled={downloadingId === document.document_id}
-                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-indigo-600 transition hover:border-indigo-500/40 hover:bg-indigo-500/5 disabled:opacity-60"
-                        title="Download document"
-                      >
-                        {downloadingId === document.document_id ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <Download size={16} />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                ))}
+          {inputDocuments.length > 0 && (
+            <SectionCard icon={FileText} title="Input Documents">
+              <DocumentGrid
+                documents={inputDocuments}
+                downloadingId={downloadingId}
+                onDownload={handleDownload}
+              />
+            </SectionCard>
+          )}
+
+          {order.output_documents_locked ? (
+            <SectionCard icon={FileText} title="Output Documents">
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/40">
+                <AlertCircle
+                  size={18}
+                  className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                    Complete payment to access output documents
+                  </p>
+                  <p className="mt-0.5 text-xs text-amber-600/90 dark:text-amber-400">
+                    Your order has been completed. Please clear the remaining
+                    balance to download the output documents.
+                  </p>
+                </div>
               </div>
             </SectionCard>
+          ) : (
+            outputDocuments.length > 0 && (
+              <SectionCard icon={FileText} title="Output Documents">
+                <DocumentGrid
+                  documents={outputDocuments}
+                  downloadingId={downloadingId}
+                  onDownload={handleDownload}
+                />
+              </SectionCard>
+            )
           )}
 
           {order.notes && (

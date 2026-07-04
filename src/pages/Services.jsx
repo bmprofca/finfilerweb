@@ -21,14 +21,7 @@ const formatCurrency = (amount) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-const TABS = [
-  { id: "All", label: "All Services" },
-  { id: "general", label: "General" },
-  { id: "personal", label: "Personal" },
-  { id: "business", label: "Business" },
-  { id: "protection", label: "Protection" },
-  { id: "advisory", label: "Advisory" },
-];
+const ALL_TAB = { id: "All", label: "All Services" };
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -167,12 +160,37 @@ export default function Services() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    apiCall("/services/categories")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body) => {
+        if (isMounted && body?.success && body.data) {
+          setCategories(body.data.categories || []);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch service categories:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const tabs = [
+    ALL_TAB,
+    ...categories.map((category) => ({ id: category, label: category })),
+  ];
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const typeParam = activeTab === "All" ? "" : activeTab.toLowerCase();
+      const typeParam = activeTab === "All" ? "" : activeTab;
       const endpoint = `/services/list?page_no=1&limit=100&search=${encodeURIComponent(searchQuery)}&type=${encodeURIComponent(typeParam)}`;
       const response = await apiCall(endpoint);
 
@@ -245,7 +263,7 @@ export default function Services() {
         variants={itemVariants}
         className="mb-6 flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
       >
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
