@@ -61,9 +61,9 @@ function Navbar() {
       <header className={`fixed top-0 left-0 right-0 z-50 h-[68px] bg-white border-b border-transparent transition-all duration-300 ${scrolled ? 'bg-white/85 border-slate-200/50 shadow-lg shadow-indigo-900/5 backdrop-blur-md' : ''}`}>
         <div className="flex items-center justify-between h-full max-w-7xl mx-auto px-6 gap-8">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 shrink-0" onClick={() => setMenuOpen(false)}>
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-400 shadow-md shadow-indigo-600/30 overflow-hidden">
-              <img src="/logo512.png" alt="FinFiler" className="w-full h-full object-cover" />
+          <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setMenuOpen(false)}>
+            <div className="flex items-center justify-center w-9 h-9 p-1 rounded-xl bg-white shadow-lg overflow-hidden">
+              <img src="/logo512.png" alt="FinFiler" className="w-full h-full object-contain" />
             </div>
             <span className="text-lg font-bold text-slate-900 tracking-tight">
               Fin<span className="font-normal bg-clip-text text-transparent bg-gradient-to-br from-indigo-600 to-indigo-400">Filer</span>
