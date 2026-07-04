@@ -11,7 +11,7 @@ export default function GrievanceRedressalPolicy() {
       <p>If you have a concern or grievance, your first point of contact should be our Customer Support team. You can reach them via:</p>
       <ul>
         <li><strong>Email:</strong> support@finfiler.com</li>
-        <li><strong>Phone:</strong> +91 800 000 0000</li>
+        <li><strong>Phone:</strong> +91 6026089502</li>
       </ul>
       <p>We aim to acknowledge your complaint within 24 hours and provide a resolution within 3 business days.</p>
 
@@ -20,7 +20,7 @@ export default function GrievanceRedressalPolicy() {
       <ul>
         <li><strong>Name:</strong> Grievance Redressal Officer</li>
         <li><strong>Email:</strong> grievances@finfiler.com</li>
-        <li><strong>Address:</strong> FinFiler Headquarters, Bangalore</li>
+        <li><strong>Address:</strong> Wahab Nagar, Sunarupatty, Kharupetia, Darrang, Assam – 784115</li>
       </ul>
 
       <h2>4. Turnaround Time</h2>

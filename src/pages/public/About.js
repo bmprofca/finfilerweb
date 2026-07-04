@@ -19,7 +19,7 @@ const team = [
 
 export default function About() {
   return (
-    <div className="bg-white min-h-screen font-sans text-slate-800">
+    <div className="bg-white min-h-screen font-sans text-slate-800 overflow-x-hidden">
       <SEO title="About Us | FinFiler" description="Learn about our mission to simplify financial compliance." />
 
       {/* HEADER SECTION */}

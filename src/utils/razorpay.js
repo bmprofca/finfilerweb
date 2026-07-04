@@ -26,10 +26,13 @@ export const loadRazorpayScript = () => {
   return scriptPromise;
 };
 
-export const initiateOrderPayment = async (orderId, amount) => {
+export const initiateOrderPayment = async (orderId, amount, gstNo) => {
   const payload = { order_id: orderId };
   if (amount !== undefined && amount !== null && amount !== '') {
     payload.amount = Number(amount);
+  }
+  if (gstNo !== undefined && gstNo !== null && gstNo !== '') {
+    payload.gst_no = gstNo;
   }
 
   const response = await apiCall('/orders/payments/initiate', 'POST', payload);
@@ -101,8 +104,8 @@ export const openRazorpayCheckout = async ({ keyId, checkout, onDismiss }) => {
   });
 };
 
-export const payForOrder = async (orderId, { amount, onDismiss } = {}) => {
-  const { key_id: keyId, checkout } = await initiateOrderPayment(orderId, amount);
+export const payForOrder = async (orderId, { amount, gstNo, onDismiss } = {}) => {
+  const { key_id: keyId, checkout } = await initiateOrderPayment(orderId, amount, gstNo);
   const paymentResponse = await openRazorpayCheckout({
     keyId,
     checkout,

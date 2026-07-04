@@ -51,9 +51,9 @@ function Footer() {
                 </a>
               </li>
               <li>
-                <a href="tel:+917002695990" className="flex items-start gap-3 text-slate-600 hover:text-indigo-600 transition-colors group">
+                <a href="tel:+916026089502" className="flex items-start gap-3 text-slate-600 hover:text-indigo-600 transition-colors group">
                   <Phone size={18} className="mt-0.5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                  <span>+91 7002695990</span>
+                  <span>+91 6026089502</span>
                 </a>
               </li>
               <li className="flex items-start gap-3 text-slate-600">

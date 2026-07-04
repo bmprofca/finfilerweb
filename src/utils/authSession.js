@@ -1,4 +1,4 @@
-import { clientRoute } from '../constants/routes';
+import { LOGIN_PATH, REGISTER_PATH } from '../constants/routes';
 
 export const AUTH_UNAUTHORIZED_EVENT = 'finfiler:auth-unauthorized';
 
@@ -10,7 +10,7 @@ export const clearAuthStorage = () => {
 
 export const isAuthPublicPath = () => {
   const path = window.location.pathname;
-  return path === clientRoute('/login') || path === clientRoute('/register');
+  return path === LOGIN_PATH || path === REGISTER_PATH;
 };
 
 /** Clear session and redirect to login when an API returns 401. */
@@ -19,6 +19,6 @@ export const handleUnauthorized = () => {
   window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
 
   if (!isAuthPublicPath()) {
-    window.location.assign(clientRoute('/login'));
+    window.location.assign(LOGIN_PATH);
   }
 };

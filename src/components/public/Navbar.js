@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { clientRoute } from '../../constants/routes';
+import { clientRoute, LOGIN_PATH, REGISTER_PATH } from '../../constants/routes';
 import { hasStoredAuth } from '../../utils/public/format';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -44,10 +44,10 @@ function Navbar() {
     </Link>
   ) : (
     <div className="flex items-center gap-3">
-      <Link to={clientRoute('/login')} className="inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-colors">
+      <Link to={LOGIN_PATH} className="inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-indigo-200 transition-colors">
         Sign in
       </Link>
-      <Link to={clientRoute('/register')} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-md hover:from-indigo-700 hover:to-indigo-600 hover:-translate-y-0.5 transition-all group">
+      <Link to={REGISTER_PATH} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-md hover:from-indigo-700 hover:to-indigo-600 hover:-translate-y-0.5 transition-all group">
         Get started
         <svg className="transition-transform group-hover:translate-x-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -139,14 +139,14 @@ function Navbar() {
             ) : (
               <>
                 <Link
-                  to={clientRoute('/login')}
+                  to={LOGIN_PATH}
                   className="flex items-center justify-center w-full py-3 text-[15px] font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl hover:bg-slate-50"
                   onClick={() => setMenuOpen(false)}
                 >
                   Sign in
                 </Link>
                 <Link
-                  to={clientRoute('/register')}
+                  to={REGISTER_PATH}
                   className="flex items-center justify-center gap-2 w-full py-3 text-[15px] font-semibold text-white bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-xl shadow-md"
                   onClick={() => setMenuOpen(false)}
                 >

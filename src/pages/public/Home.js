@@ -5,7 +5,7 @@ import {
   Rocket, Briefcase, Building2, UserCheck, Check, ArrowRight,
   ShieldCheck, Zap, MessageCircle, Globe, Star
 } from 'lucide-react';
-import { clientRoute } from '../../constants/routes';
+import { REGISTER_PATH } from '../../constants/routes';
 import SEO from '../../components/public/SEO';
 
 const personas = [
@@ -66,7 +66,7 @@ export default function Home() {
               Experience the fastest, most vibrant way to handle your taxes, company registration, and ongoing compliance. No more boring paperwork.
             </motion.p>
             <motion.div variants={fadeIn} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <Link to={clientRoute('/register')} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+              <Link to={REGISTER_PATH} className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
                 Get Started <ArrowRight size={20} />
               </Link>
               <Link to="/services" className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 hover:-translate-y-1 transition-all text-center">
@@ -181,7 +181,7 @@ export default function Home() {
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative z-10">
             <h2 className="text-4xl lg:text-6xl font-extrabold text-white mb-6">Ready for effortless compliance?</h2>
             <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">Join thousands of modern businesses who have simplified their paperwork.</p>
-            <Link to={clientRoute('/register')} className="inline-block px-10 py-5 bg-white text-indigo-700 font-extrabold rounded-full shadow-xl hover:scale-105 transition-transform duration-300">
+            <Link to={REGISTER_PATH} className="inline-block px-10 py-5 bg-white text-indigo-700 font-extrabold rounded-full shadow-xl hover:scale-105 transition-transform duration-300">
               Create Free Account
             </Link>
           </motion.div>

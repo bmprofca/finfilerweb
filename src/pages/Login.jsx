@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { clientRoute } from "../constants/routes";
+import { clientRoute, REGISTER_PATH } from "../constants/routes";
 import {
   ArrowRight,
-  ShieldCheck,
   Loader2,
   Phone,
   RotateCcw,
   ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PublicNavbar from "../components/public/Navbar";
 import AuthBrandPanel from "../components/auth/AuthBrandPanel";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
@@ -273,7 +273,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex h-dvh max-h-dvh w-full min-h-0 overflow-hidden bg-primary">
+    <div className="flex h-[calc(100dvh-68px)] max-h-[calc(100dvh-68px)] w-full min-h-0 mt-[68px] overflow-hidden bg-primary">
+      <PublicNavbar />
       <AuthBrandPanel variant="login" />
 
       {/* ── Right: Form Panel ── */}
@@ -290,8 +291,8 @@ export default function Login() {
               to="/"
               className="inline-flex items-center gap-2 mb-4 sm:mb-6 max-w-full"
             >
-              <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200">
-                <ShieldCheck size={20} />
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200 overflow-hidden">
+                <img src="/logo192.png" alt="FinFiler" className="h-6 w-6 sm:h-7 sm:w-7 object-contain" />
               </div>
               <span className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground truncate">
                 Fin<span className="text-indigo-600 font-light dark:text-indigo-400">Filer</span>
@@ -490,7 +491,7 @@ export default function Login() {
           >
             Don't have an account?{" "}
             <Link
-              to={clientRoute("/register")}
+              to={REGISTER_PATH}
               className="font-semibold text-indigo-600 hover:underline"
             >
               Create account

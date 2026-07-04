@@ -697,12 +697,14 @@ export default function OrderCreate() {
 
         if (orderFees > 0) {
           toast.dismiss(toastId);
+          const selectedFirm = firms.find((firm) => firm.firm_id === firmId);
           setCreatedOrder({
             order_id: orderId,
             fees: orderFees,
             paid_amount: 0,
             remaining_amount: orderFees,
             partial_payment_allowed: Boolean(body.data.partial_payment_allowed),
+            firm_gst_no: selectedFirm?.gst_no || null,
           });
           setPaymentModalOpen(true);
         } else {

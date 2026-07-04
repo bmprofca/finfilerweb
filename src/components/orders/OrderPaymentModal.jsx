@@ -21,6 +21,11 @@ const isPartialPaymentAllowed = (order) =>
   order?.partial_payment_allowed === 1 ||
   order?.partial_payment_allowed === "1";
 
+const GST_NUMBER_REGEX =
+  /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+const isValidGstNo = (value) => GST_NUMBER_REGEX.test(value);
+
 export default function OrderPaymentModal({
   isOpen,
   onClose,
@@ -30,6 +35,7 @@ export default function OrderPaymentModal({
 }) {
   const [paymentType, setPaymentType] = useState("full");
   const [partialAmount, setPartialAmount] = useState("");
+  const [gstNo, setGstNo] = useState("");
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
@@ -51,10 +57,13 @@ export default function OrderPaymentModal({
     if (!isOpen) {
       setPaymentType("full");
       setPartialAmount("");
+      setGstNo("");
       setPaying(false);
       setError("");
       return;
     }
+
+    setGstNo(order?.firm_gst_no || "");
 
     if (!isPartialPaymentAllowed(order)) {
       setPaymentType("full");
@@ -79,6 +88,11 @@ export default function OrderPaymentModal({
       return `Amount cannot exceed ${formatCurrency(remainingAmount)}.`;
     }
 
+    const trimmedGstNo = gstNo.trim().toUpperCase();
+    if (trimmedGstNo && !isValidGstNo(trimmedGstNo)) {
+      return "Enter a valid 15-character GST number (e.g. 22AAAAA0000A1Z5).";
+    }
+
     return "";
   };
 
@@ -95,6 +109,7 @@ export default function OrderPaymentModal({
     try {
       await payForOrder(order.order_id, {
         amount: selectedAmount,
+        gstNo: gstNo.trim().toUpperCase(),
         onDismiss: () => {
           setPaying(false);
         },
@@ -257,6 +272,33 @@ export default function OrderPaymentModal({
               </p>
             </div>
           )}
+
+          <div>
+            <label
+              htmlFor="payment-gst-no"
+              className="mb-2 block text-sm font-medium text-primary-foreground"
+            >
+              GST Number{" "}
+              <span className="text-secondary-foreground">(optional)</span>
+            </label>
+            <input
+              id="payment-gst-no"
+              type="text"
+              value={gstNo}
+              onChange={(event) => {
+                setGstNo(event.target.value.toUpperCase());
+                setError("");
+              }}
+              disabled={paying}
+              maxLength={15}
+              placeholder="e.g. 22AAAAA0000A1Z5"
+              className="w-full rounded-xl border border-border bg-primary px-4 py-3 text-sm uppercase tracking-wide text-primary-foreground outline-none transition focus:border-indigo-500"
+            />
+            <p className="mt-2 text-xs text-secondary-foreground">
+              Used for the payment invoice. Saved to your business profile
+              for next time.
+            </p>
+          </div>
 
           {error && (
             <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">

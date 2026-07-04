@@ -3,10 +3,10 @@ import { Phone, Mail, MessageCircle, Headphones, Clock } from 'lucide-react';
 import PageHeader from '../components/common/PageHeader';
 
 const CONTACT = {
-  phone: '+91 7002695990',
-  phoneHref: 'tel:+917002695990',
-  whatsapp: '917002695990',
-  whatsappHref: 'https://wa.me/917002695990',
+  phone: '+91 6026089502',
+  phoneHref: 'tel:+916026089502',
+  whatsapp: '916026089502',
+  whatsappHref: 'https://wa.me/916026089502',
   email: 'support@finfiler.com',
   emailHref: 'mailto:support@finfiler.com',
 };

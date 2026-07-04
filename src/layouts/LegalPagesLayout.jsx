@@ -49,9 +49,9 @@ function LegalPagesLayout() {
                   <Mail size={15} aria-hidden />
                   support@finfiler.com
                 </a>
-                <a href="tel:+917002695990" className="legal-sidebar-contact">
+                <a href="tel:+916026089502" className="legal-sidebar-contact">
                   <Phone size={15} aria-hidden />
-                  +91 7002695990
+                  +91 6026089502
                 </a>
                 <Link to="/contact" className="legal-sidebar-link">
                   Contact support →

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fetchServiceDetails } from '../../utils/public/api';
 import SEO from '../../components/public/SEO';
-import { clientRoute } from '../../constants/routes';
+import { REGISTER_PATH } from '../../constants/routes';
 import { ArrowLeft, CheckCircle2, FileText, Clock, IndianRupee } from 'lucide-react';
 
 export default function ServiceDetail() {
@@ -76,7 +76,7 @@ export default function ServiceDetail() {
                   {service.price}
                 </div>
               </div>
-              <Link to={clientRoute('/register')} className="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl py-4 transition-colors shadow-lg shadow-blue-600/20">
+              <Link to={REGISTER_PATH} className="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl py-4 transition-colors shadow-lg shadow-blue-600/20">
                 Buy Now
               </Link>
               <p className="text-center text-xs text-slate-500 mt-4 font-medium">100% Secure Checkout</p>

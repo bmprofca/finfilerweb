@@ -1,160 +1,169 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 import {
-  ShieldCheck,
-  FileCheck2,
-  FolderLock,
-  Headphones,
-  Building2,
   Receipt,
-  ClipboardList,
-} from 'lucide-react';
+  FileText,
+  Building2,
+  ClipboardCheck,
+  ShieldCheck,
+  Percent,
+  UserCheck,
+  Calculator,
+} from "lucide-react";
 
-const stats = [
-  { value: '10K+', label: 'Clients' },
-  { value: '50+', label: 'Services' },
-  { value: '98%', label: 'Satisfaction' },
+const SERVICES = [
+  {
+    label: "MCA Service",
+    icon: Building2,
+    bg: "bg-purple-500/20",
+    border: "border-purple-300/40",
+    text: "text-purple-100",
+  },
+  {
+    label: "Income Tax",
+    icon: FileText,
+    bg: "bg-emerald-500/20",
+    border: "border-emerald-300/40",
+    text: "text-emerald-100",
+  },
+  {
+    label: "Audit",
+    icon: ClipboardCheck,
+    bg: "bg-amber-500/20",
+    border: "border-amber-300/40",
+    text: "text-amber-100",
+  },
+
+  {
+    label: "GST",
+    icon: Receipt,
+    bg: "bg-blue-500/20",
+    border: "border-blue-300/40",
+    text: "text-blue-100",
+  },
+  {
+    label: "DSC",
+    icon: ShieldCheck,
+    bg: "bg-rose-500/20",
+    border: "border-rose-300/40",
+    text: "text-rose-100",
+  },
+  {
+    label: "TDS",
+    icon: Percent,
+    bg: "bg-cyan-500/20",
+    border: "border-cyan-300/40",
+    text: "text-cyan-100",
+  },
+  {
+    label: "Accounting",
+    icon: Calculator,
+    bg: "bg-teal-500/20",
+    border: "border-teal-300/40",
+    text: "text-teal-100",
+  },
 ];
 
-const content = {
-  login: {
-    badge: 'Client Portal',
-    headline: 'Manage compliance',
-    highlight: 'in one place.',
-    subtitle:
-      'Sign in to track orders, upload documents, and stay on top of your GST, tax, and company filings.',
-    features: [
-      {
-        icon: ClipboardList,
-        title: 'Track every filing',
-        desc: 'Real-time status for GST returns, ITR, and ROC compliance.',
-      },
-      {
-        icon: FolderLock,
-        title: 'Secure documents',
-        desc: 'Upload PAN, Aadhaar, and certificates in your private vault.',
-      },
-      {
-        icon: Headphones,
-        title: 'Expert guidance',
-        desc: 'Chartered accountants support you at every step.',
-      },
-    ],
-  },
-  register: {
-    badge: 'Get Started',
-    headline: 'Simplify your',
-    highlight: 'compliance journey.',
-    subtitle:
-      'Create an account to access GST registration, ITR filing, company setup, and 50+ services — all online.',
-    features: [
-      {
-        icon: Receipt,
-        title: 'GST & tax filing',
-        desc: 'Registration, returns, and income tax — handled end to end.',
-      },
-      {
-        icon: Building2,
-        title: 'Business setup',
-        desc: 'Company incorporation, LLP, MSME, and trademark services.',
-      },
-      {
-        icon: FileCheck2,
-        title: '100% digital',
-        desc: 'No office visits. Upload docs and track progress online.',
-      },
-    ],
-  },
-};
+const ORBIT_SIZE = 340;
+const ORBIT_RADIUS = ORBIT_SIZE / 2 - 30;
 
-function AuthBrandPanel({ variant = 'login' }) {
-  const { badge, headline, highlight, subtitle, features } = content[variant];
+function OrbitBadge() {
+  return (
+    <div className="relative" style={{ width: ORBIT_SIZE, height: ORBIT_SIZE }}>
+      {/* Soft glow behind everything */}
+      <div className="absolute inset-10 rounded-full bg-blue-400/20 blur-3xl" />
 
+      {/* Ring guides — distinct accent colors */}
+      <div className="absolute inset-0 rounded-full border-2 border-blue-400/35" />
+      <div className="absolute inset-6 rounded-full border border-dashed border-emerald-300/30" />
+
+      {/* Center logo medallion */}
+      <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+        <div className="relative flex h-48 w-48 items-center justify-center rounded-full border border-white/25 bg-gradient-to-br from-white/20 to-white/5 shadow-2xl shadow-blue-950/50 backdrop-blur-md">
+          <div className="absolute inset-2 rounded-full bg-white/95 shadow-inner" />
+          <img
+            src="/logo192.png"
+            alt="FinFiler"
+            className="relative z-10 h-32 w-32 object-contain"
+          />
+        </div>
+      </div>
+
+      {/* Service labels — fixed around the ring, no rotation/orbit motion */}
+      {SERVICES.map(({ label, icon: Icon, bg, border, text }, i) => {
+        const angle = (360 / SERVICES.length) * i - 90;
+        const rad = (angle * Math.PI) / 180;
+        const x = Math.cos(rad) * ORBIT_RADIUS;
+        const y = Math.sin(rad) * ORBIT_RADIUS;
+
+        return (
+          <div
+            key={label}
+            className="absolute left-1/2 top-1/2"
+            style={{
+              transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
+            }}
+          >
+            <motion.span
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: [1, 1.05, 1] }}
+              transition={{
+                opacity: { duration: 0.5, delay: 0.1 * i },
+                scale: {
+                  duration: 3.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.15 * i,
+                },
+              }}
+              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border ${border} ${bg} px-3 py-1.5 text-[11px] font-semibold ${text} shadow-md backdrop-blur-sm`}
+            >
+              <Icon size={13} strokeWidth={2.25} />
+              {label}
+            </motion.span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AuthBrandPanel() {
   return (
     <div
       className="hidden lg:flex lg:w-1/2 h-full min-h-0 flex-shrink-0 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(160deg, #0b1220 0%, #1e3a8a 55%, #1d4ed8 100%)',
+        background:
+          "linear-gradient(160deg, #0b1220 0%, #1e3a8a 55%, #1d4ed8 100%)",
       }}
     >
       <div
-        className="absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           backgroundImage:
-            'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
+            "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
         }}
       />
       <div
-        className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
-        style={{ background: 'radial-gradient(circle, #60a5fa, transparent 70%)' }}
+        className="pointer-events-none absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
+        style={{
+          background: "radial-gradient(circle, #60a5fa, transparent 70%)",
+        }}
       />
       <div
-        className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-25"
-        style={{ background: 'radial-gradient(circle, #34d399, transparent 70%)' }}
+        className="pointer-events-none absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-25"
+        style={{
+          background: "radial-gradient(circle, #34d399, transparent 70%)",
+        }}
       />
 
-      <div className="relative z-10 flex flex-col justify-center h-full w-full max-w-lg mx-auto px-10 xl:px-14 py-10">
+      <div className="relative z-10 flex h-full min-h-0 w-full items-center justify-center">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="flex items-center gap-3 mb-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm">
-              <ShieldCheck size={20} className="text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              Fin<span className="text-blue-300 font-normal">Filer</span>
-            </span>
-            <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-blue-200 bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">
-              {badge}
-            </span>
-          </div>
-
-          <h2 className="text-[2rem] xl:text-[2.35rem] font-bold text-white leading-tight tracking-tight">
-            {headline}
-            <br />
-            <span className="text-blue-300">{highlight}</span>
-          </h2>
-          <p className="mt-4 text-sm text-slate-300 leading-relaxed max-w-md">
-            {subtitle}
-          </p>
-        </motion.div>
-
-        <motion.ul
-          className="mt-8 space-y-3"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-        >
-          {features.map(({ icon: Icon, title, desc }) => (
-            <li
-              key={title}
-              className="flex items-start gap-3.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm px-4 py-3.5"
-            >
-              <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-blue-300">
-                <Icon size={18} strokeWidth={2} />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-white">{title}</span>
-                <span className="block text-xs text-slate-400 mt-0.5 leading-relaxed">{desc}</span>
-              </span>
-            </li>
-          ))}
-        </motion.ul>
-
-        <motion.div
-          className="mt-8 pt-6 border-t border-white/10 grid grid-cols-3 gap-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          {stats.map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <p className="text-lg font-bold text-white">{value}</p>
-              <p className="text-[11px] text-slate-400 font-medium">{label}</p>
-            </div>
-          ))}
+          <OrbitBadge />
         </motion.div>
       </div>
     </div>

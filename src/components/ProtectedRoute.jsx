@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Loader2 } from "lucide-react";
-import { clientRoute } from "../constants/routes";
+import { LOGIN_PATH } from "../constants/routes";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     // Redirect to login but save the attempted url
-    return <Navigate to={clientRoute("/login")} state={{ from: location }} replace />;
+    return <Navigate to={LOGIN_PATH} state={{ from: location }} replace />;
   }
 
   return children;

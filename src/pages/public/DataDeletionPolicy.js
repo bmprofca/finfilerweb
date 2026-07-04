@@ -8,7 +8,7 @@ export default function DataDeletionPolicy() {
       <p>Under applicable data protection laws, you have the right to request the deletion of your personal data held by FinFiler, subject to certain exceptions. We are committed to processing your request promptly and transparently.</p>
 
       <h2>2. How to Request Deletion</h2>
-      <p>To request the deletion of your data, you must submit a written request via email to privacy@finfiler.com from the email address associated with your account. We may ask for additional verification to ensure the request is valid.</p>
+      <p>To request the deletion of your data, you must submit a written request via email to support@finfiler.com from the email address associated with your account. We may ask for additional verification to ensure the request is valid.</p>
 
       <h2>3. Exceptions to Deletion</h2>
       <p>We may deny your deletion request if retaining the information is necessary for us or our service providers to:</p>

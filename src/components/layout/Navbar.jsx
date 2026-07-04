@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { clientRoute } from "../../constants/routes";
+import { clientRoute, LOGIN_PATH } from "../../constants/routes";
 import {
   Menu,
   X,
@@ -162,7 +162,7 @@ const Navbar = ({
     setLoggingOut(true);
     try {
       await logout(logoutAll ? { logout_all: true } : {});
-      navigate(clientRoute("/login"));
+      navigate(LOGIN_PATH);
     } finally {
       setLoggingOut(false);
       setLogoutModalOpen(false);
