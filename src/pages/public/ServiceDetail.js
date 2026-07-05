@@ -43,107 +43,148 @@ export default function ServiceDetail() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen font-sans text-slate-800 pb-8">
+    <div className="bg-white min-h-screen font-sans text-slate-800 relative">
       <SEO title={`${service.name} | FinFiler`} description={service.description} />
 
-      {/* HERO SECTION */}
-      <section className="bg-white pt-32 pb-16 border-b border-slate-200 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/3 -translate-y-1/3"></div>
+      {/* Progress Bar (Optional, can be removed if not needed for services) */}
+      <motion.div className="fixed top-0 left-0 right-0 h-1.5 bg-blue-500 origin-left z-50" />
 
-        <div className="max-w-5xl mx-auto px-6 relative z-10">
-          <Link to="/services" className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 font-semibold transition-colors">
-            <ArrowLeft size={18} /> Back to all services
+      <article className="pt-20 pb-16">
+        {/* HEADER */}
+        <header className="max-w-7xl mx-auto px-6 text-center mb-6">
+          <Link to="/services" className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-4 font-semibold transition-colors">
+            <ArrowLeft size={18} /> Back to services
           </Link>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex-1">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 font-bold text-sm mb-6">
-                {service.category?.name || 'Compliance Service'}
-              </span>
-              <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">
-                {service.name}
-              </h1>
-              <p className="text-xl text-slate-600">
-                {service.description}
-              </p>
-            </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 font-bold text-sm mb-6">
+              {service.type || 'Compliance Service'}
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+              {service.name}
+            </h1>
+          </motion.div>
+        </header>
 
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full md:w-80 bg-white p-8 rounded-3xl shadow-xl shadow-blue-900/5 border border-slate-100 shrink-0">
-              <div className="text-center mb-6">
-                <p className="text-sm font-semibold text-slate-500 uppercase mb-1">Starting At</p>
-                <div className="flex items-center justify-center text-4xl font-extrabold text-slate-900">
-                  <IndianRupee size={32} strokeWidth={3} className="text-slate-400" />
-                  {service.price}
+        {/* DESKTOP SPLIT / MOBILE STACK */}
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
+          
+          {/* LEFT SIDE: COVER IMAGE */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-5 relative">
+            <div className="sticky top-24 w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/10 border border-slate-100">
+              {service.image ? (
+                <img 
+                  src={service.image} 
+                  alt={service.name} 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50 p-8 text-center">
+                  <div className="w-16 h-16 bg-white shadow-sm border border-slate-100 rounded-full mb-4 flex items-center justify-center">
+                    <FileText size={24} className="text-slate-400" />
+                  </div>
+                  <p className="font-medium text-sm">No Image Available</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* RIGHT SIDE: CONTENT */}
+          <div className="lg:col-span-7 relative">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+              
+              {/* Description */}
+              <div className="prose prose-lg prose-slate max-w-none mb-10">
+                <div className="text-lg text-slate-600 whitespace-pre-line leading-relaxed">
+                  {service.description}
                 </div>
               </div>
-              <Link to={REGISTER_PATH} className="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl py-4 transition-colors shadow-lg shadow-blue-600/20">
-                Buy Now
-              </Link>
-              <p className="text-center text-xs text-slate-500 mt-4 font-medium">100% Secure Checkout</p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
-      {/* DETAILS SECTION */}
-      <section className="py-16">
-        <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                {/* Timeline */}
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm">
+                  <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <Clock size={20} className="text-blue-500" /> Delivery Time
+                  </h3>
+                  <p className="text-slate-600 font-medium">{service.delivery_time || 'Standard Timeline'}</p>
+                </div>
 
-          <div className="md:col-span-2 space-y-12">
-            {/* Dynamic content if any, else placeholders */}
-            {service.content && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="prose prose-lg prose-slate prose-blue max-w-none bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                <div dangerouslySetInnerHTML={{ __html: service.content }} />
-              </motion.div>
-            )}
+                {/* Pricing Box */}
+                <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 shadow-sm flex flex-col justify-center">
+                   <p className="text-sm font-bold text-blue-800 uppercase tracking-wider mb-2">Total Fees</p>
+                   <div className="flex items-center text-4xl font-extrabold text-slate-900">
+                     <IndianRupee size={28} strokeWidth={3} className="text-slate-400 mr-1" />
+                     {service.fees || service.total_fees || service.base_price}
+                   </div>
+                   {service.discount_value > 0 && (
+                     <p className="text-sm text-emerald-600 font-bold mt-2 flex items-center gap-1">
+                       <CheckCircle2 size={16} /> Includes discount of ₹{service.discount_value}
+                     </p>
+                   )}
+                </div>
+              </div>
 
-            {!service.content && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">Service Overview</h2>
-                <p className="text-slate-600 leading-relaxed mb-6">
-                  Our {service.name} service is designed to be completely hassle-free. We handle the heavy lifting, paperwork, and compliance so you don't have to.
-                  From start to finish, you will be assigned a dedicated expert who will guide you through the process.
+              {/* Requirements Section */}
+              <div className="mb-12 space-y-8">
+                 {/* Required Documents */}
+                 {service.documents && service.documents.length > 0 && (
+                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                      <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <FileText size={22} className="text-blue-500" /> Documents Needed
+                      </h3>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {service.documents.map((doc, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                              <CheckCircle2 size={14} strokeWidth={3} />
+                            </div>
+                            <span className="text-slate-700 font-medium">
+                              {doc.name} 
+                              <span className="block text-slate-400 font-normal text-sm mt-0.5">
+                                {doc.is_required ? 'Required' : 'Optional'}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                   </div>
+                 )}
+
+                 {/* Required Fields */}
+                 {service.fields && Object.keys(service.fields).filter(k => service.fields[k]).length > 0 && (
+                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                      <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <CheckCircle2 size={22} className="text-emerald-500" /> Required Information
+                      </h3>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.keys(service.fields).filter(k => service.fields[k]).map((field, idx) => (
+                          <span key={idx} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-medium capitalize border border-emerald-100 shadow-sm">
+                            {field.replace('_', ' ')}
+                          </span>
+                        ))}
+                      </div>
+                   </div>
+                 )}
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-8 border-t border-slate-100">
+                <Link to={REGISTER_PATH} className="group flex items-center justify-center w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl py-4 sm:px-12 transition-all shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.36)] text-lg relative overflow-hidden">
+                  <span className="relative z-10 flex items-center gap-2">
+                    Proceed to Registration <ArrowLeft size={20} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                </Link>
+                <p className="text-slate-500 mt-4 font-semibold flex items-center gap-1.5 text-sm">
+                  <CheckCircle2 size={16} className="text-emerald-500" /> 100% Secure Checkout & Encrypted Data
                 </p>
-                <ul className="space-y-4">
-                  {[
-                    'Dedicated expert assigned to your case',
-                    '100% online process with digital signatures',
-                    'Fastest turnaround time in the industry',
-                    'Free post-service support for 30 days'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-slate-700 font-medium">
-                      <CheckCircle2 className="text-emerald-500 shrink-0 mt-0.5" size={20} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </div>
+              </div>
 
-          <div className="md:col-span-1 space-y-6">
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Clock size={20} className="text-blue-500" /> Timeline
-              </h3>
-              <p className="text-slate-600 font-medium">Typically completed within 3-5 business days upon receipt of all required documents.</p>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <FileText size={20} className="text-blue-500" /> Documents Needed
-              </h3>
-              <ul className="space-y-2 text-slate-600 font-medium text-sm">
-                <li className="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">PAN Card Copy</li>
-                <li className="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">Aadhar Card</li>
-                <li className="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">Bank Statement</li>
-                <li className="flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">Address Proof</li>
-              </ul>
             </motion.div>
           </div>
 
         </div>
-      </section>
+      </article>
     </div>
   );
 }
