@@ -18,6 +18,7 @@ import {
   IndianRupee,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
+import { getOriginalFees } from "../utils/servicePricing";
 import { useToast } from "../contexts/ToastContext";
 import { DetailSkeleton } from "../components/SkeletonComponent";
 import FirmFormModal from "../components/firms/FirmFormModal";
@@ -28,6 +29,20 @@ const formatCurrency = (amount) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(amount);
+
+const formatExactCurrency = (amount) => {
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return formatCurrency(0);
+
+  const hasFraction = Math.round(value * 100) % 100 !== 0;
+
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: hasFraction ? 1 : 0,
+    maximumFractionDigits: 2,
+  }).format(value);
+};
 
 const formatBytes = (bytes) => {
   if (bytes === 0) return "0 Bytes";
@@ -111,6 +126,8 @@ function PriceRow({ label, value, muted, accent }) {
 }
 
 function PricingDetails({ service, hasDiscount, discountLabel, ordering, onOrder }) {
+  const originalFees = getOriginalFees(service);
+
   return (
     <div className="mt-5 flex flex-1 flex-col rounded-2xl border border-border bg-secondary p-5 shadow-soft sm:p-6">
       <div className="mb-5 flex items-center gap-2">
@@ -134,14 +151,14 @@ function PricingDetails({ service, hasDiscount, discountLabel, ordering, onOrder
               Total payable
             </p>
             <p className="mt-1 text-3xl font-bold tabular-nums sm:text-4xl">
-              {formatCurrency(service.fees)}
+              {formatExactCurrency(service.fees)}
             </p>
           </div>
           {hasDiscount && (
             <div className="text-right">
               <p className="text-[11px] font-medium text-indigo-200">Before discount</p>
               <p className="text-sm tabular-nums text-indigo-100 line-through">
-                {formatCurrency(service.total_fees)}
+                {formatExactCurrency(originalFees)}
               </p>
             </div>
           )}
@@ -149,7 +166,7 @@ function PricingDetails({ service, hasDiscount, discountLabel, ordering, onOrder
         {hasDiscount && (
           <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
             <Tag size={11} />
-            You save {formatCurrency(service.discount_value)}
+            You save {formatExactCurrency(service.discount_value)}
           </span>
         )}
       </div>
@@ -157,28 +174,25 @@ function PricingDetails({ service, hasDiscount, discountLabel, ordering, onOrder
       <div className="mt-4 rounded-xl border border-border bg-primary/60 px-4">
         <PriceRow
           label="Base price"
-          value={formatCurrency(service.base_price)}
+          value={formatExactCurrency(service.base_price)}
           muted
         />
-        <div className="border-t border-dashed border-border">
-          <PriceRow
-            label={`GST (${service.tax_rate ?? 0}%)`}
-            value={`+${formatCurrency(service.tax_value)}`}
-            muted
-          />
-        </div>
-        <div className="border-t border-dashed border-border">
-          <PriceRow label="Subtotal" value={formatCurrency(service.total_fees)} />
-        </div>
         {hasDiscount && (
           <div className="border-t border-dashed border-border">
             <PriceRow
               label={`Discount (${discountLabel})`}
-              value={`-${formatCurrency(service.discount_value)}`}
+              value={`-${formatExactCurrency(service.discount_value)}`}
               accent
             />
           </div>
         )}
+        <div className="border-t border-dashed border-border">
+          <PriceRow
+            label={`GST (${service.tax_rate ?? 0}%)`}
+            value={`+${formatExactCurrency(service.tax_value)}`}
+            muted
+          />
+        </div>
       </div>
 
       <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-primary px-4 py-3">

@@ -5,6 +5,7 @@ import { fetchServiceDetails } from '../../utils/public/api';
 import SEO from '../../components/public/SEO';
 import { REGISTER_PATH } from '../../constants/routes';
 import { ArrowLeft, CheckCircle2, FileText, Clock, IndianRupee } from 'lucide-react';
+import { getOriginalFees } from '../../utils/servicePricing';
 
 export default function ServiceDetail() {
   const { serviceId } = useParams();
@@ -112,15 +113,26 @@ export default function ServiceDetail() {
                 {/* Pricing Box */}
                 <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 shadow-sm flex flex-col justify-center">
                    <p className="text-sm font-bold text-blue-800 uppercase tracking-wider mb-2">Total Fees</p>
-                   <div className="flex items-center text-4xl font-extrabold text-slate-900">
-                     <IndianRupee size={28} strokeWidth={3} className="text-slate-400 mr-1" />
-                     {service.fees || service.total_fees || service.base_price}
+                   <div className="flex flex-wrap items-end gap-3">
+                     <div className="flex items-center text-4xl font-extrabold text-slate-900">
+                       <IndianRupee size={28} strokeWidth={3} className="text-slate-400 mr-1" />
+                       {service.fees || service.total_fees || service.base_price}
+                     </div>
+                     {service.discount_value > 0 && (
+                       <p className="pb-1 text-lg text-slate-400 line-through">
+                         ₹{getOriginalFees(service)}
+                       </p>
+                     )}
                    </div>
                    {service.discount_value > 0 && (
                      <p className="text-sm text-emerald-600 font-bold mt-2 flex items-center gap-1">
-                       <CheckCircle2 size={16} /> Includes discount of ₹{service.discount_value}
+                       <CheckCircle2 size={16} /> Save ₹{service.discount_value}
+                       {service.discount_type === 'percentage' ? ` (${service.discount_percentage}% off base)` : ''}
                      </p>
                    )}
+                   <p className="text-xs text-slate-500 mt-2">
+                     Inclusive of {service.tax_rate}% tax on discounted amount
+                   </p>
                 </div>
               </div>
 

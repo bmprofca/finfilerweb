@@ -24,6 +24,7 @@ import OrderPaymentModal from "../components/orders/OrderPaymentModal";
 import AnimatedModal from "../components/common/AnimatedModal";
 import { downloadPaymentInvoice } from "../utils/razorpay";
 import { useToast } from "../contexts/ToastContext";
+import { calculateServicePricing, getOriginalFees } from "../utils/servicePricing";
 import { DetailSkeleton } from "../components/SkeletonComponent";
 
 const formatCurrency = (amount) =>
@@ -281,6 +282,8 @@ function PaymentSummary({
   downloadingPaymentId,
 }) {
   const hasDiscount = Number(order.discount_value) > 0;
+  const pricing = calculateServicePricing(order);
+  const originalFees = getOriginalFees({ ...order, ...pricing });
   const discountLabel =
     order.discount_type === "percentage"
       ? `${order.discount_percentage}%`
@@ -362,28 +365,28 @@ function PaymentSummary({
           value={formatCurrency(order.base_price)}
           muted
         />
-        <div className="border-t border-dashed border-border">
-          <PriceLine
-            label={`GST (${order.tax_rate ?? 0}%)`}
-            value={`+${formatCurrency(order.tax_value)}`}
-            muted
-          />
-        </div>
-        <div className="border-t border-dashed border-border">
-          <PriceLine
-            label="Subtotal"
-            value={formatCurrency(order.total_fees)}
-          />
-        </div>
         {hasDiscount && (
           <div className="border-t border-dashed border-border">
             <PriceLine
               label={`Discount (${discountLabel})`}
-              value={`-${formatCurrency(order.discount_value)}`}
+              value={`-${formatCurrency(pricing.discount_value)}`}
               accent
             />
           </div>
         )}
+        <div className="border-t border-dashed border-border">
+          <PriceLine
+            label="Subtotal"
+            value={formatCurrency(pricing.total_fees)}
+          />
+        </div>
+        <div className="border-t border-dashed border-border">
+          <PriceLine
+            label={`GST (${order.tax_rate ?? 0}%)`}
+            value={`+${formatCurrency(pricing.tax_value)}`}
+            muted
+          />
+        </div>
         {paidAmount > 0 && (
           <div className="border-t border-dashed border-border">
             <PriceLine
@@ -429,7 +432,7 @@ function PaymentSummary({
                 Before discount
               </p>
               <p className="text-sm tabular-nums text-indigo-100 line-through">
-                {formatCurrency(order.total_fees)}
+                {formatCurrency(originalFees)}
               </p>
             </div>
           )}
@@ -437,7 +440,7 @@ function PaymentSummary({
         {hasDiscount && (
           <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">
             <Tag size={11} />
-            You save {formatCurrency(order.discount_value)}
+            You save {formatCurrency(pricing.discount_value)}
           </span>
         )}
       </div>

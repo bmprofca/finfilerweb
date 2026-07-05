@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
+import { getOriginalFees } from "../utils/servicePricing";
 import { useToast } from "../contexts/ToastContext";
 import PageHeader from "../components/common/PageHeader";
 
@@ -77,6 +78,7 @@ function ServiceImage({ src, alt, className }) {
 
 function ServiceCard({ service, onSelect }) {
   const hasDiscount = service.discount_value > 0;
+  const originalFees = getOriginalFees(service);
 
   return (
     <motion.article
@@ -132,7 +134,7 @@ function ServiceCard({ service, onSelect }) {
           </span>
           {hasDiscount && (
             <span className="text-sm text-secondary-foreground line-through">
-              {formatCurrency(service.total_fees)}
+              {formatCurrency(originalFees)}
             </span>
           )}
         </div>
