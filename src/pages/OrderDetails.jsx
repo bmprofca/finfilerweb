@@ -21,6 +21,7 @@ import {
 import { apiCall } from "../utils/apiCall";
 import { downloadOrderDocument } from "../utils/documentDownload";
 import OrderPaymentModal from "../components/orders/OrderPaymentModal";
+import AnimatedModal from "../components/common/AnimatedModal";
 import { downloadPaymentInvoice } from "../utils/razorpay";
 import { useToast } from "../contexts/ToastContext";
 import { DetailSkeleton } from "../components/SkeletonComponent";
@@ -513,48 +514,51 @@ function MetaLink({ to, icon: Icon, label, value }) {
 }
 
 function CancelOrderModal({ isOpen, onClose, onConfirm, isCancelling }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-secondary p-6 shadow-soft">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400">
-            <AlertCircle size={20} />
-          </div>
-          <h3 className="text-lg font-semibold text-primary-foreground">
-            Cancel this order?
-          </h3>
+    <AnimatedModal
+      isOpen={isOpen}
+      onClose={onClose}
+      closeOnBackdrop
+      closeDisabled={isCancelling}
+      maxWidth="max-w-md"
+      panelClassName="rounded-2xl border border-border bg-secondary p-6 shadow-soft"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400">
+          <AlertCircle size={20} />
         </div>
-        <p className="mt-3 text-sm text-secondary-foreground">
-          This action cannot be undone. Are you sure you want to cancel this
-          order?
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isCancelling}
-            className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-60"
-          >
-            Keep Order
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={isCancelling}
-            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
-          >
-            {isCancelling ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <XCircle size={16} />
-            )}
-            Yes, Cancel Order
-          </button>
-        </div>
+        <h3 className="text-lg font-semibold text-primary-foreground">
+          Cancel this order?
+        </h3>
       </div>
-    </div>
+      <p className="mt-3 text-sm text-secondary-foreground">
+        This action cannot be undone. Are you sure you want to cancel this
+        order?
+      </p>
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isCancelling}
+          className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-60"
+        >
+          Keep Order
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={isCancelling}
+          className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+        >
+          {isCancelling ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <XCircle size={16} />
+          )}
+          Yes, Cancel Order
+        </button>
+      </div>
+    </AnimatedModal>
   );
 }
 

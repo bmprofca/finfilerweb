@@ -57,22 +57,51 @@ const formatFieldLabel = (key) =>
 const getFieldPlaceholder = (key) =>
   FIELD_PLACEHOLDERS[key] || `Enter ${formatFieldLabel(key).toLowerCase()}`;
 
-const buildFieldValues = (fieldKeys, firm = null) => {
+const PROFILE_FIELD_KEYS = new Set(["mobile", "email"]);
+
+const buildFieldValues = (fieldKeys, { firm = null, clientProfile = null } = {}) => {
   const values = {};
   fieldKeys.forEach((key) => {
     values[key] = "";
   });
 
-  if (!firm) return values;
-
   fieldKeys.forEach((key) => {
-    const firmValue = firm[key];
+    if (PROFILE_FIELD_KEYS.has(key)) {
+      const profileValue = clientProfile?.[key];
+      if (profileValue != null && String(profileValue).trim()) {
+        values[key] = String(profileValue).trim();
+      }
+      return;
+    }
+
+    const firmValue = firm?.[key];
     if (firmValue != null && String(firmValue).trim()) {
-      values[key] = String(firmValue).trim();
+      values[key] = normalizeFieldValue(key, String(firmValue).trim());
     }
   });
 
   return values;
+};
+
+const mergeFieldPrefill = (prev, fieldKeys, { firm = null, clientProfile = null } = {}) => {
+  const next = { ...prev };
+
+  fieldKeys.forEach((key) => {
+    if (PROFILE_FIELD_KEYS.has(key)) {
+      const profileValue = clientProfile?.[key];
+      if (profileValue != null && String(profileValue).trim()) {
+        next[key] = String(profileValue).trim();
+      }
+      return;
+    }
+
+    const firmValue = firm?.[key];
+    if (firmValue != null && String(firmValue).trim()) {
+      next[key] = normalizeFieldValue(key, String(firmValue).trim());
+    }
+  });
+
+  return next;
 };
 
 const getRequiredFieldKeys = (fields) => {
@@ -119,6 +148,13 @@ const truncateFileName = (fileName = "", maxBaseLength = 12) => {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/i;
+
+const isPanField = (key) => key === "pan_no";
+
+const normalizePanValue = (value) => String(value ?? "").toUpperCase();
+
+const normalizeFieldValue = (key, value) =>
+  isPanField(key) ? normalizePanValue(value) : value;
 const MOBILE_REGEX = /^[6-9]\d{9}$/;
 const AADHAAR_REGEX = /^\d{12}$/;
 
@@ -199,6 +235,7 @@ export default function OrderCreate() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [createdOrder, setCreatedOrder] = useState(null);
 
+  const [clientProfile, setClientProfile] = useState(null);
   const [orderName, setOrderName] = useState("");
   const [notes, setNotes] = useState("");
   const [firmId, setFirmId] = useState(null);
@@ -228,13 +265,15 @@ export default function OrderCreate() {
     setError(null);
 
     try {
-      const [serviceResponse, firmsResponse] = await Promise.all([
+      const [serviceResponse, firmsResponse, profileResponse] = await Promise.all([
         apiCall(`/services/details/${serviceId}`),
         apiCall("/firms/list?page_no=1&limit=100"),
+        apiCall("/accounts", "GET"),
       ]);
 
       const serviceBody = await serviceResponse.json();
       const firmsBody = await firmsResponse.json();
+      const profileBody = await profileResponse.json();
 
       if (!serviceResponse.ok || !serviceBody.success || !serviceBody.data) {
         throw new Error(
@@ -246,23 +285,28 @@ export default function OrderCreate() {
         throw new Error(firmsBody.message || "Failed to load businesses");
       }
 
+      const clientProfileData =
+        profileResponse.ok && profileBody.success ? profileBody.data : null;
+
       const firmList = firmsBody.data?.firms || [];
       const fieldKeys = getRequiredFieldKeys(serviceBody.data.fields);
+      const prefillOptions = { clientProfile: clientProfileData };
 
       setService(serviceBody.data);
       setFirms(firmList);
+      setClientProfile(clientProfileData);
 
       if (firmList.length === 0) {
         setFirmModalOpen(true);
         setFirmId(null);
-        setFieldValues(buildFieldValues(fieldKeys));
+        setFieldValues(buildFieldValues(fieldKeys, prefillOptions));
       } else if (firmList.length === 1) {
         const soleFirm = firmList[0];
         setFirmId(soleFirm.firm_id);
-        setFieldValues(buildFieldValues(fieldKeys, soleFirm));
+        setFieldValues(buildFieldValues(fieldKeys, { ...prefillOptions, firm: soleFirm }));
       } else {
         setFirmId(null);
-        setFieldValues(buildFieldValues(fieldKeys));
+        setFieldValues(buildFieldValues(fieldKeys, prefillOptions));
       }
     } catch (err) {
       setError(err.message || "Failed to load order form.");
@@ -290,7 +334,7 @@ export default function OrderCreate() {
   }, [service?.name, firmId, firms]);
 
   const handleFieldChange = (key) => (event) => {
-    const value = event.target.value;
+    const value = normalizeFieldValue(key, event.target.value);
     setFieldValues((prev) => ({ ...prev, [key]: value }));
 
     if (showValidation) {
@@ -320,16 +364,12 @@ export default function OrderCreate() {
     const selectedFirm = firms.find((firm) => firm.firm_id === selectedFirmId);
     if (!selectedFirm) return;
 
-    setFieldValues((prev) => {
-      const next = { ...prev };
-      requiredFieldKeys.forEach((key) => {
-        const firmValue = selectedFirm[key];
-        if (firmValue != null && String(firmValue).trim()) {
-          next[key] = String(firmValue).trim();
-        }
-      });
-      return next;
-    });
+    setFieldValues((prev) =>
+      mergeFieldPrefill(prev, requiredFieldKeys, {
+        firm: selectedFirm,
+        clientProfile,
+      }),
+    );
   };
 
   const handleClearDocument = (documentName) => {
@@ -683,7 +723,12 @@ export default function OrderCreate() {
         service_id: service.service_id,
         firm_id: firmId,
         name: orderName.trim(),
-        fields: fieldValues,
+        fields: Object.fromEntries(
+          Object.entries(fieldValues).map(([key, value]) => [
+            key,
+            normalizeFieldValue(key, value),
+          ]),
+        ),
         documents,
         notes: notes.trim() || undefined,
       };
@@ -754,16 +799,12 @@ export default function OrderCreate() {
   const handleFirmCreated = (firm) => {
     setFirms((prev) => [firm, ...prev]);
     setFirmId(firm.firm_id);
-    setFieldValues((prev) => {
-      const next = { ...prev };
-      requiredFieldKeys.forEach((key) => {
-        const firmValue = firm[key];
-        if (firmValue != null && String(firmValue).trim()) {
-          next[key] = String(firmValue).trim();
-        }
-      });
-      return next;
-    });
+    setFieldValues((prev) =>
+      mergeFieldPrefill(prev, requiredFieldKeys, {
+        firm,
+        clientProfile,
+      }),
+    );
     setFirmModalOpen(false);
     toast.success("Business created. You can now place your order.");
   };
@@ -825,54 +866,56 @@ export default function OrderCreate() {
             noValidate
             className="space-y-6 rounded-2xl border border-border bg-secondary p-6 shadow-soft"
           >
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-primary-foreground">
-                Business <span className="text-red-500">*</span>
-              </label>
-              <div
-                className={`rounded-xl transition ${
-                  showValidation && validationErrors.firm
-                    ? "bg-red-500/5 ring-2 ring-red-500/30"
-                    : ""
-                }`}
-              >
-                <SelectField
-                  value={
-                    firmOptions.find((item) => item.value === firmId) || null
-                  }
-                  onChange={handleFirmChange}
-                  options={firmOptions}
-                  placeholder="Select a business"
-                />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-primary-foreground">
+                  Business <span className="text-red-500">*</span>
+                </label>
+                <div
+                  className={`rounded-xl transition ${
+                    showValidation && validationErrors.firm
+                      ? "bg-red-500/5 ring-2 ring-red-500/30"
+                      : ""
+                  }`}
+                >
+                  <SelectField
+                    value={
+                      firmOptions.find((item) => item.value === firmId) || null
+                    }
+                    onChange={handleFirmChange}
+                    options={firmOptions}
+                    placeholder="Select a business"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-primary-foreground">
-                Order Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={orderName}
-                onChange={(event) => {
-                  setOrderName(event.target.value);
-                  if (showValidation) {
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      name: event.target.value.trim()
-                        ? ""
-                        : "Order name is required.",
-                    }));
-                  }
-                }}
-                placeholder="e.g. GST Registration for ABC Pvt Ltd"
-                className={getInputClass(
-                  Boolean(showValidation && validationErrors.name),
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-primary-foreground">
+                  Order Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={orderName}
+                  onChange={(event) => {
+                    setOrderName(event.target.value);
+                    if (showValidation) {
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        name: event.target.value.trim()
+                          ? ""
+                          : "Order name is required.",
+                      }));
+                    }
+                  }}
+                  placeholder="e.g. GST Registration for ABC Pvt Ltd"
+                  className={getInputClass(
+                    Boolean(showValidation && validationErrors.name),
+                  )}
+                />
+                {showValidation && validationErrors.name && (
+                  <p className="mt-1.5 text-xs text-red-500">{validationErrors.name}</p>
                 )}
-              />
-              {showValidation && validationErrors.name && (
-                <p className="mt-1.5 text-xs text-red-500">{validationErrors.name}</p>
-              )}
+              </div>
             </div>
 
             {requiredFieldKeys.length > 0 && (
