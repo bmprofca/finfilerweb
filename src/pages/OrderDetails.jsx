@@ -17,6 +17,8 @@ import {
   CreditCard,
   CheckCircle2,
   XCircle,
+  Calendar,
+  History,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
 import { downloadOrderDocument } from "../utils/documentDownload";
@@ -181,7 +183,7 @@ const canPayForOrder = (order) => {
   return order?.status !== "cancelled" && remaining > 0;
 };
 
-const formatPaymentDate = (value) => {
+const formatDateTime = (value) => {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
@@ -193,6 +195,8 @@ const formatPaymentDate = (value) => {
     minute: "2-digit",
   }).format(date);
 };
+
+const formatPaymentDate = formatDateTime;
 
 const downloadInvoiceFile = async (url, filename, toast) => {
   try {
@@ -473,6 +477,73 @@ function PaymentSummary({
   );
 }
 
+function MetaInfo({ icon: Icon, label, value }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-primary px-4 py-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+        <Icon size={16} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-secondary-foreground">
+          {label}
+        </p>
+        <p className="truncate text-sm font-semibold text-primary-foreground">
+          {value || "—"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StatusHistoryTable({ logs = [] }) {
+  if (!logs.length) {
+    return (
+      <p className="rounded-xl border border-dashed border-border bg-primary/50 px-4 py-6 text-center text-sm text-secondary-foreground">
+        No status updates recorded yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="min-w-full divide-y divide-border text-sm">
+        <thead className="bg-primary/60">
+          <tr>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground">
+              Date &amp; Time
+            </th>
+            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground">
+              Status
+            </th>
+            <th className="hidden px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground sm:table-cell">
+              Remark
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border bg-secondary">
+          {[...logs].reverse().map((log, index) => (
+            <tr key={log.log_id || `${log.status}-${log.create_date}-${index}`}>
+              <td className="whitespace-nowrap px-4 py-3 tabular-nums text-secondary-foreground">
+                {formatDateTime(log.create_date)}
+              </td>
+              <td className="px-4 py-3">
+                <span
+                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(log.status)}`}
+                >
+                  {formatStatusLabel(log.status)}
+                </span>
+              </td>
+              <td className="hidden px-4 py-3 text-secondary-foreground sm:table-cell">
+                {log.remark || "—"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function MetaLink({ to, icon: Icon, label, value }) {
   if (!value) {
     return (
@@ -740,7 +811,7 @@ export default function OrderDetails() {
           )}
         </div>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <MetaLink
             to={clientRoute(`/services/${order.service_id}`)}
             icon={Tag}
@@ -754,6 +825,11 @@ export default function OrderDetails() {
             icon={Building2}
             label="Business"
             value={order.firm_id && order.firm_name ? order.firm_name : null}
+          />
+          <MetaInfo
+            icon={Calendar}
+            label="Order Date"
+            value={formatDateTime(order.create_date)}
           />
         </div>
       </header>
@@ -827,6 +903,10 @@ export default function OrderDetails() {
               </p>
             </SectionCard>
           )}
+
+          <SectionCard icon={History} title="Status History">
+            <StatusHistoryTable logs={order.status_logs || []} />
+          </SectionCard>
         </div>
 
         <div className="lg:col-span-5">

@@ -1,20 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Loader2, Save, Building2, X } from "lucide-react";
 import { apiCall } from "../../utils/apiCall";
 import { useToast } from "../../contexts/ToastContext";
 import SelectField from "../common/SelectField";
 import AnimatedModal from "../common/AnimatedModal";
 import { FormSkeleton } from "../SkeletonComponent";
-
-export const FIRM_TYPES = [
-  { value: "proprietorship", label: "Proprietorship" },
-  { value: "partnership", label: "Partnership" },
-  { value: "llp", label: "LLP" },
-  { value: "private_limited", label: "Private Limited" },
-  { value: "public_limited", label: "Public Limited" },
-  { value: "opc", label: "One Person Company" },
-  { value: "other", label: "Other" },
-];
 
 const EMPTY_FORM = {
   name: "",
@@ -37,6 +27,8 @@ export default function FirmFormModal({
   const isEdit = mode === "edit";
 
   const [form, setForm] = useState(EMPTY_FORM);
+  const [firmTypes, setFirmTypes] = useState([]);
+  const [typesLoading, setTypesLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -77,6 +69,25 @@ export default function FirmFormModal({
     }
   }, [firmId, isEdit]);
 
+  const fetchFirmTypes = useCallback(async () => {
+    setTypesLoading(true);
+    try {
+      const response = await apiCall("/firms/types");
+      const body = await response.json();
+
+      if (response.ok && body.success && body.data) {
+        setFirmTypes(body.data.types || []);
+      } else {
+        throw new Error(body.message || "Failed to load business types");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to load business types.");
+      setFirmTypes([]);
+    } finally {
+      setTypesLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
     if (!isOpen) {
       resetForm();
@@ -88,7 +99,17 @@ export default function FirmFormModal({
     } else {
       resetForm();
     }
-  }, [isOpen, isEdit, firmId, fetchFirm, resetForm]);
+
+    fetchFirmTypes();
+  }, [isOpen, isEdit, firmId, fetchFirm, fetchFirmTypes, resetForm]);
+
+  const typeOptions = useMemo(() => {
+    const options = [...firmTypes];
+    if (form.type && !options.some((item) => item.value === form.type)) {
+      options.unshift({ value: form.type, label: form.type });
+    }
+    return options;
+  }, [firmTypes, form.type]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -204,10 +225,11 @@ export default function FirmFormModal({
                   Business Type <span className="text-red-500">*</span>
                 </label>
                 <SelectField
-                  value={FIRM_TYPES.find((item) => item.value === form.type) || null}
+                  value={typeOptions.find((item) => item.value === form.type) || null}
                   onChange={handleTypeChange}
-                  options={FIRM_TYPES}
-                  placeholder="Select business type"
+                  options={typeOptions}
+                  placeholder={typesLoading ? "Loading business types…" : "Select business type"}
+                  isDisabled={typesLoading}
                 />
               </div>
 

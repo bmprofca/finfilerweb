@@ -13,6 +13,7 @@ import MainLayout from "./components/layout/Main";
 import PublicWebsiteLayout from "./layouts/PublicWebsiteLayout";
 
 import { clientRoute } from "./constants/routes";
+import LegacyClientRedirect from "./components/LegacyClientRedirect";
 
 // ── Lazy-loaded pages (each becomes its own JS chunk) ──────────────
 const Login = lazy(() => import("./pages/Login"));
@@ -94,7 +95,7 @@ function App() {
                   <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
                   {/* Client portal */}
-                  <Route path="/client" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                  <Route path="/panel" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                     <Route index element={<Navigate to="home" replace />} />
                     <Route path="home" element={<Home />} />
                     <Route path="dashboard" element={<Home />} />
@@ -113,6 +114,8 @@ function App() {
                   {/* Legacy redirects */}
                   <Route path="/client/login" element={<Navigate to="/login" replace />} />
                   <Route path="/client/register" element={<Navigate to="/register" replace />} />
+                  <Route path="/client" element={<Navigate to="/panel/home" replace />} />
+                  <Route path="/client/*" element={<LegacyClientRedirect />} />
                   <Route path="/home" element={<Navigate to={clientRoute("/home")} replace />} />
                   <Route path="/dashboard" element={<Navigate to={clientRoute("/dashboard")} replace />} />
                   <Route path="/orders" element={<Navigate to={clientRoute("/orders")} replace />} />
@@ -134,4 +137,3 @@ function App() {
 }
 
 export default App;
-
