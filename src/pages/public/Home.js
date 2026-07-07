@@ -351,36 +351,40 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="relative flex justify-center lg:justify-end mt-8 lg:mt-0"
+                className="relative flex flex-col justify-center lg:justify-end mt-8 lg:mt-0"
               >
-                <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:mt-16">
-                  <AccuracyRing />
-                  <div className="absolute inset-[18px] rounded-full overflow-hidden shadow-xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=700"
-                      alt="Person checking tax filing on phone"
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                <div className="w-full flex justify-center lg:justify-end ">
+                  <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:mt-16">
+                    <AccuracyRing />
+                    <div className="absolute inset-[18px] rounded-full overflow-hidden shadow-xl">
+                      <img
+                        src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=700"
+                        alt="Indian businessman reviewing documents"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
+                  {/* Floating card - positioned absolutely */}
+                  <TaxBreakdownCard className="absolute top-0 left-0 sm:top-4 sm:left-4 md:top-20 md:left-4 lg:top-20" />
                 </div>
-                {/* Floating card - positioned absolutely */}
-                <TaxBreakdownCard className="absolute top-0 left-0 sm:top-4 sm:left-4 md:top-20 md:left-4 lg:top-20" />
+                <div className="bg-gray-200 px-10 py-6">
+                  {/* STATS */}
+                  <div className="grid grid-cols-2 gap-8 border-t border-slate-100 ">
+                    <div>
+                      <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">₹ 3,120 Cr+</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-1">Lifetime ITR refund delivered</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">6 M+</p>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-1">Users trust us</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3">Figures shown are illustrative placeholder data.</p>
+                </div>
+
               </motion.div>
             </div>
-
-            {/* STATS */}
-            <div className="grid grid-cols-2 gap-8 border-t border-slate-100 pt-6 mt-10">
-              <div>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">₹ 3,120 Cr+</p>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Lifetime ITR refund delivered</p>
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">6 M+</p>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Users trust us</p>
-              </div>
-            </div>
-            <p className="text-xs text-slate-400 mt-3">Figures shown are illustrative placeholder data.</p>
           </div>
         </section>
 
@@ -443,7 +447,7 @@ export default function Home() {
                     <img
                       src={card.photo}
                       alt={card.caption}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-contain"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/10 to-transparent" />
