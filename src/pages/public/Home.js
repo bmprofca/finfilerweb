@@ -257,7 +257,7 @@ export default function Home() {
         />
 
         {/* ============================== HERO ============================== */}
-        <section className="relative pt-8 pb-14 lg:pt-10 lg:pb-16 overflow-hidden">
+        <section className="relative pt-20 pb-14 lg:pb-16 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <motion.div 
               initial="hidden" 
