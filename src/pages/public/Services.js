@@ -31,13 +31,7 @@ export default function Services() {
       <section className="pt-20 pb-8 bg-white relative border-b border-slate-100">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">
-            All the <span className="text-blue-600">Services</span> You Need
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-lg text-slate-600 max-w-2xl mx-auto mb-10">
-            From company incorporation to annual tax filing, we have experts ready to help you handle your compliance efficiently and affordably.
-          </motion.p>
-
+          
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="max-w-2xl mx-auto relative flex items-center">
              <div className="absolute left-4 text-slate-400">
                 <Search size={20} />
