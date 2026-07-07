@@ -24,7 +24,7 @@ export default function BlogList() {
     <div className="bg-slate-50 min-h-screen font-sans text-slate-800">
       <SEO title="Blog | FinFiler Insights" description="Latest updates, news, and insights on financial compliance." />
 
-      <section className="pt-32 pb-16 bg-white relative border-b border-slate-100 overflow-hidden">
+      <section className="pt-20 pb-8 bg-white relative border-b border-slate-100 overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60 translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
@@ -37,7 +37,7 @@ export default function BlogList() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-6">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (

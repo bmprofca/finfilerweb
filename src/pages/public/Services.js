@@ -28,7 +28,7 @@ export default function Services() {
     <div className="bg-slate-50 min-h-screen font-sans text-slate-800">
       <SEO title="Our Services | FinFiler" description="Explore our comprehensive range of financial compliance services." />
 
-      <section className="pt-32 pb-16 bg-white relative border-b border-slate-100">
+      <section className="pt-20 pb-8 bg-white relative border-b border-slate-100">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">
@@ -45,21 +45,21 @@ export default function Services() {
              <input 
                type="text" 
                placeholder="Search for a service (e.g. GST Registration)" 
-               className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-lg"
+               className="w-full pl-12 pr-4 py-2 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-lg"
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
              />
              <div className="absolute right-4 text-slate-400 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
-               <Filter size={18} />
+               <Filter size={14} />
              </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-6">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-900">{filteredServices.length} Services Found</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-slate-900">{filteredServices.length} Services Found</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
