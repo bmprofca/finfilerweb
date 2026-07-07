@@ -89,7 +89,7 @@ export default function BlogDetail() {
       {/* Progress Bar */}
       <motion.div className="fixed top-0 left-0 right-0 h-1.5 bg-emerald-500 origin-left z-50" style={{ scaleX }} />
 
-      <article className="pt-32 pb-24">
+      <article className="pt-20 pb-12">
         {/* HEADER */}
         <header className="max-w-7xl mx-auto px-6 text-center mb-12">
           <Link to="/blogs" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 mb-8 font-semibold transition-colors">
@@ -100,7 +100,7 @@ export default function BlogDetail() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-sm mb-6">
               {blog.category?.name || 'Compliance Guide'}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">
               {blog.title}
             </h1>
 
