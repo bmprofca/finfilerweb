@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Briefcase, TrendingUp, UserCheck, Wallet, Globe2, Gem,
-  ArrowRight, Star, ShieldCheck, FileCheck2, UserCog, Check, 
+  ArrowRight, Star, ShieldCheck, FileCheck2, UserCog, Check,
   BadgeCheck, IndianRupee, TrendingDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { REGISTER_PATH } from '../../constants/routes';
@@ -23,20 +23,20 @@ const personas = [
 ];
 
 const whyCards = [
-  { 
+  {
     id: 0,
-    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600&h=400', 
-    caption: 'Real tax practitioners review every return before it goes out.' 
+    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=600&h=400',
+    caption: 'Real tax practitioners review every return before it goes out.'
   },
-  { 
+  {
     id: 1,
-    photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600&h=400', 
-    caption: 'Our error-detection technology reviews your data twice, so nothing slips through.' 
+    photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600&h=400',
+    caption: 'Our error-detection technology reviews your data twice, so nothing slips through.'
   },
-  { 
+  {
     id: 2,
-    photo: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=600&h=400', 
-    caption: 'File once, get it right — no revision loops or repeat document requests.' 
+    photo: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=600&h=400',
+    caption: 'File once, get it right — no revision loops or repeat document requests.'
   },
 ];
 
@@ -86,10 +86,10 @@ const pricingTiers = [
 
 const heroFade = {
   hidden: { opacity: 0, y: 16 },
-  visible: (i = 0) => ({ 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.5, delay: i * 0.08, ease: 'easeOut' } 
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.08, ease: 'easeOut' }
   }),
 };
 
@@ -117,7 +117,7 @@ function AccuracyRing({ colorA = '#DBEAFE', colorB = '#2563EB', label = '100% AC
       <circle cx="120" cy="120" r="100" fill="none" stroke={colorA} strokeWidth="18" />
       <text fontSize="12.5" fontWeight="700" fill={colorB} letterSpacing="3">
         <textPath href={`#${pathId}`} startOffset="0%">
-          {label} • {label} • {label} • 
+          {label} • {label} • {label} •
         </textPath>
       </text>
     </svg>
@@ -171,17 +171,15 @@ function TaxBreakdownCard({ className = "" }) {
         {taxRows.map((row, i) => (
           <div
             key={row.label}
-            className={`flex items-center justify-between text-[10px] leading-tight transition-opacity duration-300 ${
-              i < step ? "opacity-100" : "opacity-30"
-            }`}
+            className={`flex items-center justify-between text-[10px] leading-tight transition-opacity duration-300 ${i < step ? "opacity-100" : "opacity-30"
+              }`}
           >
             <span className={`truncate pr-1 ${row.muted ? "text-slate-400" : "text-slate-600"}`}>
               {row.label}
             </span>
             <span
-              className={`font-medium tabular-nums whitespace-nowrap ${
-                row.muted ? "text-rose-500" : "text-slate-800"
-              }`}
+              className={`font-medium tabular-nums whitespace-nowrap ${row.muted ? "text-rose-500" : "text-slate-800"
+                }`}
             >
               {row.value}
             </span>
@@ -193,15 +191,13 @@ function TaxBreakdownCard({ className = "" }) {
         {taxRegimes.map((r) => (
           <div
             key={r.name}
-            className={`flex items-center justify-between rounded-md px-1.5 py-1 ${
-              r.active ? "bg-emerald-50" : "bg-slate-50"
-            }`}
+            className={`flex items-center justify-between rounded-md px-1.5 py-1 ${r.active ? "bg-emerald-50" : "bg-slate-50"
+              }`}
           >
             <span className="text-[10px] text-slate-600">{r.name}</span>
             <span
-              className={`text-[10px] font-semibold tabular-nums ${
-                r.active ? "text-emerald-600" : "text-slate-500"
-              }`}
+              className={`text-[10px] font-semibold tabular-nums ${r.active ? "text-emerald-600" : "text-slate-500"
+                }`}
             >
               {r.tax}
             </span>
@@ -259,11 +255,11 @@ export default function Home() {
         {/* ============================== HERO ============================== */}
         <section className="relative pt-20 pb-14 lg:pb-16 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <motion.div 
-              initial="hidden" 
-              animate="visible" 
-              custom={0} 
-              variants={heroFade} 
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              custom={0}
+              variants={heroFade}
               className="flex flex-wrap items-center gap-3 mb-5 text-sm"
             >
               <span className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 font-semibold text-slate-700 text-xs sm:text-sm">
@@ -280,64 +276,68 @@ export default function Home() {
 
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               {/* LEFT COLUMN */}
-              <div>
-                <motion.h1 
-                  initial="hidden" 
-                  animate="visible" 
-                  custom={1} 
-                  variants={heroFade} 
+              <div className="text-center lg:text-left">
+                <motion.h1
+                  initial="hidden"
+                  animate="visible"
+                  custom={1}
+                  variants={heroFade}
                   className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.1] text-slate-900 mb-4"
                 >
-                  File ITR in minutes<br />with <span className="text-blue-600">100% Accuracy</span>
+                  File ITR in minutes — <br />
+                  <span className="text-blue-600">simple, fast & hassle-free</span>
+                  <span className="block text-2xl sm:text-3xl md:text-4xl lg:text-[2.2rem] mt-2 text-slate-700">
+                    with <span className="text-blue-600">100% Accuracy</span>
+                  </span>
                 </motion.h1>
-                
-                <motion.div 
-                  initial="hidden" 
-                  animate="visible" 
-                  custom={2} 
-                  variants={heroFade} 
+
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  custom={2}
+                  variants={heroFade}
                   className="inline-block bg-emerald-50 text-emerald-700 font-semibold text-xs sm:text-sm px-4 py-2 rounded-lg mb-4"
                 >
                   Maximum Tax Refund, Guaranteed
                 </motion.div>
-                
-                <motion.div 
-                  initial="hidden" 
-                  animate="visible" 
-                  custom={3} 
-                  variants={heroFade} 
-                  className="flex items-start sm:items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm mb-6 max-w-md"
+
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  custom={3}
+                  variants={heroFade}
+                  className="flex items-start sm:items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm mb-6 max-w-md mx-auto lg:mx-0"
                 >
                   <ShieldCheck size={22} className="text-blue-600 shrink-0 mt-0.5 sm:mt-0" />
                   <p className="text-xs sm:text-sm text-slate-600">
                     <span className="font-bold text-slate-900">FinFiler Filing Shield</span> — got a notice? We handle it free. Computation error? Full refund.
                   </p>
                 </motion.div>
-                
-                <motion.div 
-                  initial="hidden" 
-                  animate="visible" 
-                  custom={4} 
-                  variants={heroFade} 
-                  className="grid sm:grid-cols-2 gap-4 max-w-lg"
+
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  custom={4}
+                  variants={heroFade}
+                  className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto lg:mx-0"
                 >
                   <div className="bg-gradient-to-br from-amber-50 to-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <FileCheck2 size={26} className="text-amber-500 mb-3" />
+                    <FileCheck2 size={26} className="text-amber-500 mb-3 mx-auto sm:mx-0" />
                     <p className="font-bold text-slate-900 mb-0.5 text-sm sm:text-base">File your taxes</p>
                     <p className="text-xs sm:text-sm text-slate-500 mb-3">In 3 simple steps</p>
-                    <Link 
-                      to={REGISTER_PATH} 
+                    <Link
+                      to={REGISTER_PATH}
                       className="inline-block w-full text-center bg-blue-600 hover:bg-blue-700 transition-colors text-white text-sm font-semibold px-4 py-2.5 rounded-lg"
                     >
                       Start Filing Now
                     </Link>
                   </div>
                   <div className="bg-gradient-to-br from-rose-50 to-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <UserCog size={26} className="text-rose-500 mb-3" />
+                    <UserCog size={26} className="text-rose-500 mb-3 mx-auto sm:mx-0" />
                     <p className="font-bold text-slate-900 mb-0.5 text-sm sm:text-base">Expert files for you</p>
                     <p className="text-xs sm:text-sm text-slate-500 mb-3">ITR filed in 24 hrs</p>
-                    <Link 
-                      to="/experts" 
+                    <Link
+                      to="/experts"
                       className="inline-block w-full text-center bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors text-sm font-semibold px-4 py-2.5 rounded-lg"
                     >
                       Hire an Expert
@@ -347,18 +347,18 @@ export default function Home() {
               </div>
 
               {/* RIGHT COLUMN - Hero Image with Floating Card */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.94 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.7, delay: 0.2 }} 
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
                 className="relative flex justify-center lg:justify-end mt-8 lg:mt-0"
               >
                 <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:mt-16">
                   <AccuracyRing />
                   <div className="absolute inset-[18px] rounded-full overflow-hidden shadow-xl">
-                    <img 
-                      src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=700" 
-                      alt="Person checking tax filing on phone" 
+                    <img
+                      src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=700"
+                      alt="Person checking tax filing on phone"
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -390,19 +390,19 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl lg:text-[2.75rem] font-extrabold text-center text-slate-900 mb-10 leading-tight">
               India's most trusted <span className="text-blue-600">tax filing platform</span> for
             </h2>
-            <motion.div 
-              initial="hidden" 
-              whileInView="visible" 
-              viewport={{ once: true, amount: 0.1 }} 
-              variants={cardGridStagger} 
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
+              variants={cardGridStagger}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5"
             >
               {personas.map((p) => {
                 const Icon = p.icon;
                 return (
-                  <motion.div 
-                    key={p.title} 
-                    variants={cardItem} 
+                  <motion.div
+                    key={p.title}
+                    variants={cardItem}
                     className={`${p.bg} rounded-2xl p-5 md:p-6 border border-slate-100 card-hover`}
                   >
                     <div className="flex items-start justify-between gap-4 mb-4">
@@ -412,8 +412,8 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="text-slate-600 text-xs sm:text-sm mb-5">{p.desc}</p>
-                    <Link 
-                      to={`/services?for=${encodeURIComponent(p.title)}`} 
+                    <Link
+                      to={`/services?for=${encodeURIComponent(p.title)}`}
                       className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700"
                     >
                       Learn more <ArrowRight size={15} />
@@ -431,18 +431,18 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl lg:text-[2.75rem] font-extrabold text-center text-slate-900 mb-10">
               Why choose <span className="text-blue-600">FinFiler</span> to file your taxes
             </h2>
-            
+
             {/* CAROUSEL */}
             <div className="relative overflow-hidden rounded-2xl">
-              <div 
+              <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${activeSlide * 100}%)` }}
               >
                 {whyCards.map((card) => (
                   <div key={card.id} className="w-full flex-shrink-0 relative h-[280px] sm:h-[320px] md:h-[360px] lg:h-[400px]">
-                    <img 
-                      src={card.photo} 
-                      alt={card.caption} 
+                    <img
+                      src={card.photo}
+                      alt={card.caption}
                       className="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
                     />
@@ -476,9 +476,8 @@ export default function Home() {
                   <button
                     key={i}
                     onClick={() => goToSlide(i)}
-                    className={`h-2 rounded-full transition-all ${
-                      activeSlide === i ? 'w-6 bg-blue-600' : 'w-2 bg-white/60 hover:bg-white/80'
-                    }`}
+                    className={`h-2 rounded-full transition-all ${activeSlide === i ? 'w-6 bg-blue-600' : 'w-2 bg-white/60 hover:bg-white/80'
+                      }`}
                     aria-label={`Go to slide ${i + 1}`}
                   />
                 ))}
@@ -496,12 +495,12 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {accuracyCards.map((card, i) => (
-                <motion.div 
-                  key={card.title} 
-                  initial={{ opacity: 0, y: 20 }} 
-                  whileInView={{ opacity: 1, y: 0 }} 
-                  viewport={{ once: true }} 
-                  transition={{ delay: i * 0.1 }} 
+                <motion.div
+                  key={card.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
                   className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6"
                 >
                   <p className="font-bold text-slate-900 text-center mb-5 leading-snug text-sm md:text-base">
@@ -530,10 +529,9 @@ export default function Home() {
                             </span>
                           </div>
                           <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-1000 ${
-                                r.good ? 'w-1/3 bg-emerald-500' : 'w-4/5 bg-rose-400'
-                              }`} 
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 ${r.good ? 'w-1/3 bg-emerald-500' : 'w-4/5 bg-rose-400'
+                                }`}
                             />
                           </div>
                           {r.good && r.savings && (
@@ -558,8 +556,8 @@ export default function Home() {
                   File ITR in Minutes<br />with <span className="text-blue-600">100% Accuracy</span>
                 </h3>
                 <p className="text-slate-600 mb-5 text-sm sm:text-base">Maximum Tax Refund, Guaranteed</p>
-                <Link 
-                  to={REGISTER_PATH} 
+                <Link
+                  to={REGISTER_PATH}
                   className="inline-block bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold px-6 sm:px-7 py-3 sm:py-3.5 rounded-lg text-sm sm:text-base mb-5"
                 >
                   Start Filing Now
@@ -573,9 +571,9 @@ export default function Home() {
               </div>
               <div className="relative flex justify-center">
                 <div className="relative w-full max-w-xs">
-                  <img 
-                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=500" 
-                    alt="Person holding phone showing refund amount" 
+                  <img
+                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=500"
+                    alt="Person holding phone showing refund amount"
                     className="w-full rounded-2xl shadow-xl"
                     loading="lazy"
                   />
@@ -601,11 +599,11 @@ export default function Home() {
                     <div
                       key={e.name}
                       className="absolute w-28 sm:w-36 rounded-xl overflow-hidden shadow-lg border border-white"
-                      style={{ 
-                        left: `${i * 55}px`, 
-                        top: i === 1 ? 0 : 18, 
-                        zIndex: i === 1 ? 10 : 5, 
-                        transform: i === 1 ? 'scale(1.08)' : 'scale(1)' 
+                      style={{
+                        left: `${i * 55}px`,
+                        top: i === 1 ? 0 : 18,
+                        zIndex: i === 1 ? 10 : 5,
+                        transform: i === 1 ? 'scale(1.08)' : 'scale(1)'
                       }}
                     >
                       <img src={e.photo} alt={e.name} className="w-full h-24 sm:h-32 object-cover" loading="lazy" />
@@ -674,17 +672,17 @@ export default function Home() {
                 <p className="text-slate-600 mb-5 max-w-sm text-sm sm:text-base">
                   with every detail handled right from start to submission.
                 </p>
-                <Link 
-                  to="/experts" 
+                <Link
+                  to="/experts"
                   className="inline-block bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold px-6 sm:px-7 py-3 sm:py-3.5 rounded-lg text-sm sm:text-base"
                 >
                   Hire a Tax Expert
                 </Link>
               </div>
               <div className="relative h-56 sm:h-72 lg:h-96 order-1 lg:order-2">
-                <img 
-                  src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800" 
-                  alt="Tax expert reviewing return with client" 
+                <img
+                  src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800"
+                  alt="Tax expert reviewing return with client"
                   className="absolute inset-0 w-full h-full object-cover"
                   loading="lazy"
                 />
@@ -713,11 +711,10 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
               {pricingTiers.map((t) => (
-                <div 
-                  key={t.name} 
-                  className={`bg-white rounded-2xl border p-5 md:p-6 text-center card-hover relative ${
-                    t.popular ? 'border-blue-400 shadow-md' : 'border-slate-100'
-                  }`}
+                <div
+                  key={t.name}
+                  className={`bg-white rounded-2xl border p-5 md:p-6 text-center card-hover relative ${t.popular ? 'border-blue-400 shadow-md' : 'border-slate-100'
+                    }`}
                 >
                   {t.popular && (
                     <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] sm:text-[10px] font-bold px-3 py-0.5 rounded-full">
@@ -727,8 +724,8 @@ export default function Home() {
                   <p className={`font-extrabold text-base sm:text-lg mb-1 ${t.color}`}>{t.name}</p>
                   <p className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2">{t.price}</p>
                   <p className="text-[10px] sm:text-xs text-slate-500 mb-5">{t.desc}</p>
-                  <Link 
-                    to={REGISTER_PATH} 
+                  <Link
+                    to={REGISTER_PATH}
                     className="inline-block w-full text-center border border-slate-200 hover:border-blue-600 hover:text-blue-600 transition-colors text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg"
                   >
                     Choose plan
