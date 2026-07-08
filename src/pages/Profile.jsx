@@ -25,6 +25,7 @@ import SelectField from "../components/common/SelectField";
 import DatePickerField from "../components/common/DatePickerField";
 import PageHeader from "../components/common/PageHeader";
 import { profileSelectStyles } from "../hooks/reactSelectConfig";
+import { INDIAN_STATE_OPTIONS } from "../utils/indianStates";
 
 const GENDER_OPTIONS = [
   { value: "male", label: "Male", icon: "♂" },
@@ -521,6 +522,12 @@ const Profile = () => {
   const selectedProfession =
     PROFESSION_OPTIONS.find((option) => option.value === professionChoice) ||
     null;
+  const stateOptions =
+    state && !INDIAN_STATE_OPTIONS.some((option) => option.value === state)
+      ? [{ value: state, label: state }, ...INDIAN_STATE_OPTIONS]
+      : INDIAN_STATE_OPTIONS;
+  const selectedState =
+    stateOptions.find((option) => option.value === state) || null;
 
   return (
     <div className="mx-auto min-w-0 max-w-full space-y-4">
@@ -860,12 +867,17 @@ const Profile = () => {
                                 <label className="block text-sm font-medium text-secondary-foreground mb-1">
                                   State
                                 </label>
-                                <input
-                                  type="text"
-                                  value={state}
-                                  onChange={(e) => setState(e.target.value)}
-                                  placeholder="State"
-                                  className={inputClass}
+                                <SelectField
+                                  value={selectedState}
+                                  onChange={(option) =>
+                                    setState(option?.value || "")
+                                  }
+                                  options={stateOptions}
+                                  placeholder="Select state"
+                                  isClearable
+                                  isSearchable
+                                  styles={profileSelectStyles}
+                                  classNamePrefix="react-select"
                                 />
                               </div>
                               <div>

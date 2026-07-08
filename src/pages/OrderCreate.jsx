@@ -59,7 +59,10 @@ const getFieldPlaceholder = (key) =>
 
 const PROFILE_FIELD_KEYS = new Set(["mobile", "email"]);
 
-const buildFieldValues = (fieldKeys, { firm = null, clientProfile = null } = {}) => {
+const buildFieldValues = (
+  fieldKeys,
+  { firm = null, clientProfile = null } = {},
+) => {
   const values = {};
   fieldKeys.forEach((key) => {
     values[key] = "";
@@ -83,7 +86,11 @@ const buildFieldValues = (fieldKeys, { firm = null, clientProfile = null } = {})
   return values;
 };
 
-const mergeFieldPrefill = (prev, fieldKeys, { firm = null, clientProfile = null } = {}) => {
+const mergeFieldPrefill = (
+  prev,
+  fieldKeys,
+  { firm = null, clientProfile = null } = {},
+) => {
   const next = { ...prev };
 
   fieldKeys.forEach((key) => {
@@ -265,11 +272,12 @@ export default function OrderCreate() {
     setError(null);
 
     try {
-      const [serviceResponse, firmsResponse, profileResponse] = await Promise.all([
-        apiCall(`/services/details/${serviceId}`),
-        apiCall("/firms/list?page_no=1&limit=100"),
-        apiCall("/accounts", "GET"),
-      ]);
+      const [serviceResponse, firmsResponse, profileResponse] =
+        await Promise.all([
+          apiCall(`/services/details/${serviceId}`),
+          apiCall("/firms/list?page_no=1&limit=100"),
+          apiCall("/accounts", "GET"),
+        ]);
 
       const serviceBody = await serviceResponse.json();
       const firmsBody = await firmsResponse.json();
@@ -303,7 +311,9 @@ export default function OrderCreate() {
       } else if (firmList.length === 1) {
         const soleFirm = firmList[0];
         setFirmId(soleFirm.firm_id);
-        setFieldValues(buildFieldValues(fieldKeys, { ...prefillOptions, firm: soleFirm }));
+        setFieldValues(
+          buildFieldValues(fieldKeys, { ...prefillOptions, firm: soleFirm }),
+        );
       } else {
         setFirmId(null);
         setFieldValues(buildFieldValues(fieldKeys, prefillOptions));
@@ -677,7 +687,8 @@ export default function OrderCreate() {
 
     const hasFieldErrors = Object.keys(errors.fields).length > 0;
     const hasDocumentErrors = Object.keys(errors.documents).length > 0;
-    const isValid = !errors.firm && !errors.name && !hasFieldErrors && !hasDocumentErrors;
+    const isValid =
+      !errors.firm && !errors.name && !hasFieldErrors && !hasDocumentErrors;
 
     return { isValid, errors };
   };
@@ -913,7 +924,9 @@ export default function OrderCreate() {
                   )}
                 />
                 {showValidation && validationErrors.name && (
-                  <p className="mt-1.5 text-xs text-red-500">{validationErrors.name}</p>
+                  <p className="mt-1.5 text-xs text-red-500">
+                    {validationErrors.name}
+                  </p>
                 )}
               </div>
             </div>

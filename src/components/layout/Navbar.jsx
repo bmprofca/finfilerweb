@@ -93,10 +93,11 @@ const LogoutModal = ({ isOpen, onClose, onConfirm, loading }) => {
           {/* Toggle pill */}
           <div
             className={`relative flex-shrink-0 w-11 h-6 rounded-full border transition-colors duration-200
-                ${logoutAll
-                ? "bg-indigo-600 border-indigo-500"
-                : "bg-secondary border-border group-hover:border-secondary-foreground/40"
-              }`}
+                ${
+                  logoutAll
+                    ? "bg-indigo-600 border-indigo-500"
+                    : "bg-secondary border-border group-hover:border-secondary-foreground/40"
+                }`}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200
