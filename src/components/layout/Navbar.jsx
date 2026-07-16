@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useState, useContext, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { clientRoute, LOGIN_PATH } from "../../constants/routes";
 import {
@@ -196,7 +196,22 @@ const Navbar = ({
 
   const isSidebarOpen = isMobile ? sidebarOpen : isDesktopSidebarExpanded;
 
+  // Guards against StrictMode double-invoke, overlapping fetches, and
+  // setState calls after the component has unmounted.
+  const isFetchingBalance = useRef(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const fetchBalance = useCallback(async () => {
+    if (isFetchingBalance.current) return; // already in flight, skip
+    isFetchingBalance.current = true;
+
     setBalanceLoading(true);
     setBalanceError(false);
     try {
@@ -207,14 +222,22 @@ const Navbar = ({
         throw new Error(data?.message || "Failed to fetch balance");
       }
 
-      setBalance(data?.data?.balance ?? 0);
+      if (isMounted.current) {
+        setBalance(data?.data?.balance ?? 0);
+      }
     } catch (err) {
       console.error("fetchBalance error:", err);
-      setBalanceError(true);
+      if (isMounted.current) {
+        setBalanceError(true);
+      }
     } finally {
-      setBalanceLoading(false);
+      isFetchingBalance.current = false;
+      if (isMounted.current) {
+        setBalanceLoading(false);
+      }
     }
   }, []);
+
 
   useEffect(() => {
     fetchBalance();
