@@ -286,9 +286,9 @@ const Navbar = ({
               <button
                 type="button"
                 onClick={() => navigate(clientRoute("/home"))}
-                className="flex items-center gap-0 sm:gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
+                className="flex items-center gap-0 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
               >
-                <div className="w-8 h-8 flex-shrink-0">
+                <div className="w-6 h-6 flex-shrink-0">
                   <img
                     src="/logo512.png"
                     alt="FinFiler Logo"
