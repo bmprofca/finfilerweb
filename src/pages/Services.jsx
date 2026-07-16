@@ -254,7 +254,7 @@ export default function Services() {
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-50"
               >
                 <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-                Refresh
+                <span className="hidden sm:inline">Refresh </span>
               </button>
             </>
           }

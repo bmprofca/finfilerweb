@@ -219,7 +219,7 @@ export default function Orders() {
                 className="flex items-center justify-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-60"
               >
                 {loading ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-                Refresh
+                <span className="hidden sm:flex">Refresh</span>
               </motion.button>
             </>
           }

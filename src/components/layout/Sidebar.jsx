@@ -30,8 +30,8 @@ const Sidebar = ({
     { icon: ClipboardList, label: "Orders", path: clientRoute("/orders") },
     { icon: FolderOpen, label: "Documents", path: clientRoute("/documents") },
     { icon: Building2, label: "Businesses", path: clientRoute("/firms") },
+    { icon: Wallet, label: "Transactions", path: clientRoute("/ledger") },
     { icon: Headphones, label: "Support", path: clientRoute("/support") },
-    { icon: Wallet, label: "Wallet", path: clientRoute("/ledger") },
   ];
 
   const isActiveRoute = (itemPath) => {
