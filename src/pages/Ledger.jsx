@@ -6,8 +6,6 @@ import {
     Wallet,
     TrendingUp,
     TrendingDown,
-    ChevronLeft,
-    ChevronRight,
     Loader2,
     AlertCircle,
     X,
@@ -20,6 +18,7 @@ import {
 import AnimatedModal from "../components/common/AnimatedModal";
 import { apiCall } from "../utils/apiCall";
 import { motion } from "framer-motion";
+import Pagination from "../components/common/PaginationComponent";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -293,7 +292,7 @@ const TransactionRow = ({ tx, onClick }) => {
 
 // ── Main Page ────────────────────────────────────────────────────────────
 
-const LIMIT = 20;
+const DEFAULT_LIMIT = 20;
 
 const TransactionLedgerPage = () => {
     const [ledger, setLedger] = useState({
@@ -301,11 +300,12 @@ const TransactionLedgerPage = () => {
         total_credit: 0,
         total_debit: 0,
         transactions: [],
-        pagination: { page_no: 1, limit: LIMIT, total: 0, total_pages: 1 },
+        pagination: { page_no: 1, limit: DEFAULT_LIMIT, total: 0, total_pages: 1 },
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(DEFAULT_LIMIT);
     const [selectedTxId, setSelectedTxId] = useState(null);
 
     const isFetching = useRef(false);
@@ -318,7 +318,7 @@ const TransactionLedgerPage = () => {
         };
     }, []);
 
-    const fetchLedger = useCallback(async (pageNo) => {
+    const fetchLedger = useCallback(async (pageNo, pageLimit) => {
         if (isFetching.current) return;
         isFetching.current = true;
 
@@ -326,7 +326,7 @@ const TransactionLedgerPage = () => {
         setError(false);
         try {
             const response = await apiCall(
-                `/transactions/ledger?page=${pageNo}&limit=${LIMIT}`,
+                `/transactions/ledger?page=${pageNo}&limit=${pageLimit}`,
                 "GET"
             );
             const data = await response.json();
@@ -343,7 +343,7 @@ const TransactionLedgerPage = () => {
                     transactions: data?.data?.transactions ?? [],
                     pagination: data?.data?.pagination ?? {
                         page_no: pageNo,
-                        limit: LIMIT,
+                        limit: pageLimit,
                         total: 0,
                         total_pages: 1,
                     },
@@ -359,15 +359,13 @@ const TransactionLedgerPage = () => {
     }, []);
 
     useEffect(() => {
-        fetchLedger(page);
-    }, [page, fetchLedger]);
+        fetchLedger(page, limit);
+    }, [page, limit, fetchLedger]);
 
     const { transactions, pagination } = ledger;
-    const hasPrev = pagination.page_no > 1;
-    const hasNext = pagination.page_no < pagination.total_pages;
 
     return (
-        <div className="mx-auto max-w-7xl space-y-3">
+        <div className="mx-auto space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between gap-3">
                 <div>
@@ -379,7 +377,7 @@ const TransactionLedgerPage = () => {
                     </p>
                 </div>
                 <motion.button
-                    onClick={() => fetchLedger(page)}
+                    onClick={() => fetchLedger(page, limit)}
                     disabled={loading}
                     className="flex items-center justify-center gap-2 rounded-md border border-border bg-secondary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary disabled:opacity-60"
                 >
@@ -424,7 +422,7 @@ const TransactionLedgerPage = () => {
                             Couldn't load your transactions.
                         </p>
                         <button
-                            onClick={() => fetchLedger(page)}
+                            onClick={() => fetchLedger(page, limit)}
                             className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
                         >
                             Try again
@@ -454,33 +452,18 @@ const TransactionLedgerPage = () => {
             </div>
 
             {/* Pagination */}
-            {!loading && !error && transactions.length > 0 && (
-                <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs text-secondary-foreground">
-                        Page {pagination.page_no} of {pagination.total_pages} ·{" "}
-                        {pagination.total} total
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={!hasPrev}
-                            className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-secondary hover:bg-secondary/70 text-secondary-foreground hover:text-primary-foreground transition-colors disabled:opacity-40 disabled:hover:bg-secondary"
-                            aria-label="Previous page"
-                        >
-                            <ChevronLeft size={15} />
-                        </button>
-                        <button
-                            onClick={() =>
-                                setPage((p) => Math.min(pagination.total_pages, p + 1))
-                            }
-                            disabled={!hasNext}
-                            className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-secondary hover:bg-secondary/70 text-secondary-foreground hover:text-primary-foreground transition-colors disabled:opacity-40 disabled:hover:bg-secondary"
-                            aria-label="Next page"
-                        >
-                            <ChevronRight size={15} />
-                        </button>
-                    </div>
-                </div>
+            {pagination.total > 0 && (
+                <Pagination
+                    currentPage={pagination.page_no}
+                    totalItems={pagination.total}
+                    itemsPerPage={limit}
+                    onPageChange={setPage}
+                    onLimitChange={(value) => {
+                        setLimit(value);
+                        setPage(1);
+                    }}
+                    availableLimits={[10, 20, 50, 100]}
+                />
             )}
 
             {/* Detail modal */}

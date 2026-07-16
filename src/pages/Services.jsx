@@ -225,7 +225,7 @@ export default function Services() {
 
   return (
     <motion.div
-      className="mx-auto max-w-7xl"
+      className="mx-auto"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

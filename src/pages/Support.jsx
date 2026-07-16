@@ -52,7 +52,7 @@ const itemVariants = {
 export default function Support() {
   return (
     <motion.div
-      className="mx-auto max-w-4xl"
+      className="mx-auto"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
