@@ -166,7 +166,7 @@ const WalletBalance = ({ onClick, balance, loading, error }) => {
         </span>
       )}
 
-      <span className="flex items-center justify-center w-5 h-5 rounded-lg bg-emerald-500/15 group-hover:bg-emerald-500/25 transition-colors">
+      <span className="hidden sm:flex items-center justify-center w-5 h-5 rounded-lg bg-emerald-500/15 group-hover:bg-emerald-500/25 transition-colors">
         <Plus size={12} className="text-emerald-400" />
       </span>
     </button>
@@ -270,10 +270,10 @@ const Navbar = ({
   return (
     <>
       <nav className="sticky top-0 z-40 h-16 bg-nav shadow-md border-b border-border">
-        <div className="px-4 h-full">
+        <div className="px-2 sm:px-4 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Left section */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center md:space-x-4">
               <button
                 onClick={toggleSidebar}
                 className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 focus:outline-none flex-shrink-0
@@ -286,7 +286,7 @@ const Navbar = ({
               <button
                 type="button"
                 onClick={() => navigate(clientRoute("/home"))}
-                className="flex items-center gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
+                className="flex items-center gap-0 sm:gap-2 rounded-lg transition-opacity duration-200 hover:opacity-90 focus:outline-none"
               >
                 <div className="w-8 h-8 flex-shrink-0">
                   <img
@@ -304,7 +304,7 @@ const Navbar = ({
             </div>
 
             {/* Right section */}
-            <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="flex items-center md:space-x-4">
               <WalletBalance
                 onClick={handleWalletClick}
                 balance={balance}

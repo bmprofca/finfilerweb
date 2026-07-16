@@ -6,6 +6,7 @@ import {
   FolderOpen,
   Building2,
   Headphones,
+  Wallet,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { clientRoute } from "../../constants/routes";
@@ -30,6 +31,7 @@ const Sidebar = ({
     { icon: FolderOpen, label: "Documents", path: clientRoute("/documents") },
     { icon: Building2, label: "Businesses", path: clientRoute("/firms") },
     { icon: Headphones, label: "Support", path: clientRoute("/support") },
+    { icon: Wallet, label: "Wallet", path: clientRoute("/ledger") },
   ];
 
   const isActiveRoute = (itemPath) => {
