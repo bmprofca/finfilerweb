@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { clientRoute, LOGIN_PATH } from "../../constants/routes";
 import {
@@ -11,10 +11,14 @@ import {
   Moon,
   AlertTriangle,
   Loader2,
+  Wallet,
+  Plus,
 } from "lucide-react";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import AnimatedModal from "../common/AnimatedModal";
+import { apiCall } from "../../utils/apiCall";
+import LoadMoneyModal from "../LoadMoneyModal";
 
 // ── Logout Modal ───────────────────────────────────────────────────────────
 
@@ -93,11 +97,10 @@ const LogoutModal = ({ isOpen, onClose, onConfirm, loading }) => {
           {/* Toggle pill */}
           <div
             className={`relative flex-shrink-0 w-11 h-6 rounded-full border transition-colors duration-200
-                ${
-                  logoutAll
-                    ? "bg-indigo-600 border-indigo-500"
-                    : "bg-secondary border-border group-hover:border-secondary-foreground/40"
-                }`}
+                ${logoutAll
+                ? "bg-indigo-600 border-indigo-500"
+                : "bg-secondary border-border group-hover:border-secondary-foreground/40"
+              }`}
           >
             <span
               className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200
@@ -136,6 +139,40 @@ const LogoutModal = ({ isOpen, onClose, onConfirm, loading }) => {
   );
 };
 
+// ── Wallet Balance Pill ─────────────────────────────────────────────────────
+
+const WalletBalance = ({ onClick, balance, loading, error }) => {
+  const formatted = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(balance ?? 0);
+
+  return (
+    <button
+      onClick={onClick}
+      title={error ? "Failed to load balance — click to retry" : "Load wallet balance"}
+      className="group flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-xl border border-border bg-secondary hover:bg-secondary/70 transition-colors"
+    >
+      <Wallet className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+
+      {loading ? (
+        <Loader2 size={13} className="animate-spin text-secondary-foreground" />
+      ) : error ? (
+        <span className="text-xs font-medium text-red-400">Retry</span>
+      ) : (
+        <span className="text-sm font-semibold text-primary-foreground tabular-nums">
+          {formatted}
+        </span>
+      )}
+
+      <span className="flex items-center justify-center w-5 h-5 rounded-lg bg-emerald-500/15 group-hover:bg-emerald-500/25 transition-colors">
+        <Plus size={12} className="text-emerald-400" />
+      </span>
+    </button>
+  );
+};
+
 // ── Navbar ─────────────────────────────────────────────────────────────────
 
 const Navbar = ({
@@ -148,11 +185,40 @@ const Navbar = ({
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
+  const [balance, setBalance] = useState(0);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [balanceError, setBalanceError] = useState(false);
+  const [loadMoneyOpen, setLoadMoneyOpen] = useState(false);
+
   const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { user, logout } = useAuth();
 
   const isSidebarOpen = isMobile ? sidebarOpen : isDesktopSidebarExpanded;
+
+  const fetchBalance = useCallback(async () => {
+    setBalanceLoading(true);
+    setBalanceError(false);
+    try {
+      const response = await apiCall("/transactions/balance", "GET");
+      const data = await response.json();
+
+      if (!response.ok || !data?.success) {
+        throw new Error(data?.message || "Failed to fetch balance");
+      }
+
+      setBalance(data?.data?.balance ?? 0);
+    } catch (err) {
+      console.error("fetchBalance error:", err);
+      setBalanceError(true);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   const openLogoutModal = () => {
     setOpenDropdown(false);
@@ -168,6 +234,14 @@ const Navbar = ({
       setLoggingOut(false);
       setLogoutModalOpen(false);
     }
+  };
+
+  const handleWalletClick = () => {
+    if (balanceError) {
+      fetchBalance();
+      return;
+    }
+    setLoadMoneyOpen(true);
   };
 
   return (
@@ -208,6 +282,13 @@ const Navbar = ({
 
             {/* Right section */}
             <div className="flex items-center space-x-2 md:space-x-4">
+              <WalletBalance
+                onClick={handleWalletClick}
+                balance={balance}
+                loading={balanceLoading}
+                error={balanceError}
+              />
+
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg text-secondary-foreground hover:bg-secondary transition-colors focus:outline-none"
@@ -332,6 +413,19 @@ const Navbar = ({
         onClose={() => setLogoutModalOpen(false)}
         onConfirm={handleLogoutConfirm}
         loading={loggingOut}
+      />
+
+      {/* Load money modal */}
+      <LoadMoneyModal
+        isOpen={loadMoneyOpen}
+        onClose={() => setLoadMoneyOpen(false)}
+        onSuccess={(newBalance) => {
+          if (typeof newBalance === "number") {
+            setBalance(newBalance);
+          } else {
+            fetchBalance();
+          }
+        }}
       />
     </>
   );
