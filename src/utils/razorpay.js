@@ -128,3 +128,36 @@ export const downloadPaymentInvoice = async (orderId, paymentId) => {
 
   return body.data;
 };
+
+export const loadWalletMoney = async ({ amount, onDismiss }) => {
+  const initResponse = await apiCall('/transactions/load', 'POST', {
+    amount: Number(amount),
+  });
+  const initData = await initResponse.json();
+
+  if (!initResponse.ok || !initData?.success) {
+    throw new Error(initData?.message || 'Failed to initiate wallet load');
+  }
+
+  const { key_id: keyId, checkout, payment } = initData.data;
+
+  const paymentResponse = await openRazorpayCheckout({
+    keyId,
+    checkout,
+    onDismiss,
+  });
+
+  const verifyResponse = await apiCall('/transactions/load/verify', 'POST', {
+    razorpay_order_id: paymentResponse.razorpay_order_id,
+    razorpay_payment_id: paymentResponse.razorpay_payment_id,
+    razorpay_signature: paymentResponse.razorpay_signature,
+    payment_id: payment?.payment_id,
+  });
+  const verifyData = await verifyResponse.json();
+
+  if (!verifyResponse.ok || !verifyData?.success) {
+    throw new Error(verifyData?.message || 'Payment verification failed');
+  }
+
+  return verifyData.data;
+};
