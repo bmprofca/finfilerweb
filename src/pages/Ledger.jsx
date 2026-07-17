@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     Receipt,
     ArrowDownLeft,
@@ -14,11 +14,14 @@ import {
     Calendar,
     User,
     RefreshCw,
+    Eye,
 } from "lucide-react";
 import AnimatedModal from "../components/common/AnimatedModal";
 import { apiCall } from "../utils/apiCall";
 import { motion } from "framer-motion";
 import Pagination from "../components/common/PaginationComponent";
+import ManagementTable from "../components/common/ManagementTable";
+import AdminSkeleton from "../components/SkeletonComponent";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -239,56 +242,6 @@ const SummaryCard = ({ icon: Icon, label, value, tone }) => {
     );
 };
 
-// ── Row / Card for a single transaction ─────────────────────────────────
-
-const TransactionRow = ({ tx, onClick }) => {
-    const isCredit = tx.type === "cr";
-    const created = formatDate(tx.create_date);
-
-    return (
-        <button
-            onClick={onClick}
-            className="w-full flex items-center gap-3 md:gap-4 px-4 py-3.5 md:py-3 hover:bg-secondary/60 transition-colors text-left border-b border-border last:border-b-0"
-        >
-            <span
-                className={`flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 ${isCredit
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "bg-red-500/10 text-red-400"
-                    }`}
-            >
-                {isCredit ? (
-                    <ArrowDownLeft size={16} />
-                ) : (
-                    <ArrowUpRight size={16} />
-                )}
-            </span>
-
-            <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-primary-foreground truncate">
-                    {tx.remark || PURPOSE_LABELS[tx.purpose] || tx.purpose}
-                </p>
-                <p className="text-xs text-secondary-foreground">
-                    {typeof created === "object"
-                        ? `${created.date} · ${created.time}`
-                        : created}
-                </p>
-            </div>
-
-            <div className="text-right flex-shrink-0">
-                <p
-                    className={`text-sm font-semibold tabular-nums ${isCredit ? "text-emerald-400" : "text-red-400"
-                        }`}
-                >
-                    {isCredit ? "+" : "−"}
-                    {formatCurrency(tx.amount)}
-                </p>
-                <p className="text-xs text-secondary-foreground tabular-nums">
-                    Bal {formatCurrency(tx.new_balance)}
-                </p>
-            </div>
-        </button>
-    );
-};
 
 // ── Main Page ────────────────────────────────────────────────────────────
 
@@ -364,6 +317,92 @@ const TransactionLedgerPage = () => {
 
     const { transactions, pagination } = ledger;
 
+    const columns = useMemo(
+        () => [
+            {
+                key: "serial",
+                label: "#",
+                headerClassName: "w-12 text-center",
+                className: "w-12 text-center text-secondary-foreground tabular-nums",
+                render: (_row, index) => (page - 1) * limit + index + 1,
+            },
+            {
+                key: "transaction",
+                label: "Transaction",
+                render: (row) => (
+                    <div>
+                        <p className="font-semibold text-primary-foreground">
+                            {row.remark || PURPOSE_LABELS[row.purpose] || row.purpose}
+                        </p>
+                        <p className="text-xs text-secondary-foreground">{row.transaction_id || "—"}</p>
+                    </div>
+                ),
+            },
+            {
+                key: "date",
+                label: "Date & Time",
+                className: "text-secondary-foreground",
+                render: (row) => {
+                    const created = formatDate(row.create_date);
+                    return typeof created === "object"
+                        ? `${created.date} · ${created.time}`
+                        : created;
+                },
+            },
+            {
+                key: "type",
+                label: "Type",
+                render: (row) => {
+                    const isCredit = row.type === "cr";
+                    return (
+                        <div className="flex items-center gap-2">
+                            <span
+                                className={`flex items-center justify-center w-6 h-6 rounded-md flex-shrink-0 ${isCredit
+                                        ? "bg-emerald-500/10 text-emerald-400"
+                                        : "bg-red-500/10 text-red-400"
+                                    }`}
+                            >
+                                {isCredit ? <ArrowDownLeft size={14} /> : <ArrowUpRight size={14} />}
+                            </span>
+                            <span className="text-sm font-medium text-primary-foreground capitalize">
+                                {isCredit ? "Credit" : "Debit"}
+                            </span>
+                        </div>
+                    );
+                },
+            },
+            {
+                key: "amount",
+                label: "Amount",
+                className: "font-semibold",
+                render: (row) => {
+                    const isCredit = row.type === "cr";
+                    return (
+                        <span className={isCredit ? "text-emerald-400" : "text-red-400"}>
+                            {isCredit ? "+" : "−"}
+                            {formatCurrency(row.amount)}
+                        </span>
+                    );
+                },
+            },
+            {
+                key: "balance",
+                label: "Balance",
+                className: "text-secondary-foreground font-medium",
+                render: (row) => formatCurrency(row.new_balance),
+            },
+        ],
+        [page, limit]
+    );
+
+    const getActions = (row) => [
+        {
+            label: "View Details",
+            icon: <Eye size={14} />,
+            onClick: () => setSelectedTxId(row.transaction_id),
+        },
+    ];
+
     return (
         <div className="mx-auto space-y-3">
             {/* Header */}
@@ -408,63 +447,54 @@ const TransactionLedgerPage = () => {
                 />
             </div>
 
-            {/* Transactions list */}
-            <div className="rounded-2xl border border-border bg-secondary/40 overflow-hidden">
+            {error && !loading && (
+                <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-500">
+                    <AlertCircle size={18} />
+                    <span className="flex-1">Couldn't load your transactions.</span>
+                    <button onClick={() => fetchLedger(page, limit)} className="font-semibold hover:underline">
+                        Retry
+                    </button>
+                </div>
+            )}
+
+            <div>
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center gap-2 py-16">
-                        <Loader2 size={22} className="animate-spin text-secondary-foreground" />
-                        <p className="text-sm text-secondary-foreground">Loading transactions…</p>
-                    </div>
-                ) : error ? (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 px-4 text-center">
-                        <AlertCircle size={22} className="text-red-400" />
-                        <p className="text-sm text-secondary-foreground">
-                            Couldn't load your transactions.
-                        </p>
-                        <button
-                            onClick={() => fetchLedger(page, limit)}
-                            className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-                        >
-                            Try again
-                        </button>
-                    </div>
+                    <AdminSkeleton />
                 ) : transactions.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-2 py-16 px-4 text-center">
-                        <Receipt size={22} className="text-secondary-foreground" />
-                        <p className="text-sm font-medium text-primary-foreground">
-                            No transactions yet
-                        </p>
-                        <p className="text-xs text-secondary-foreground">
+                    <div className="rounded-2xl border border-dashed border-border bg-secondary px-6 py-16 text-center">
+                        <Receipt className="mx-auto mb-4 h-12 w-12 text-secondary-foreground" />
+                        <h3 className="text-lg font-semibold text-primary-foreground">No transactions yet</h3>
+                        <p className="mt-2 text-sm text-secondary-foreground">
                             Load money into your wallet to see activity here.
                         </p>
                     </div>
                 ) : (
-                    <div>
-                        {transactions.map((tx) => (
-                            <TransactionRow
-                                key={tx.transaction_id}
-                                tx={tx}
-                                onClick={() => setSelectedTxId(tx.transaction_id)}
+                    <>
+                        <ManagementTable
+                            rows={transactions}
+                            columns={columns}
+                            rowKey="transaction_id"
+                            getActions={getActions}
+                            accent="indigo"
+                            onRowClick={(row) => setSelectedTxId(row.transaction_id)}
+                            emptyState="No transactions found."
+                        />
+                        <div className="mt-6">
+                            <Pagination
+                                currentPage={pagination.page_no}
+                                totalItems={pagination.total}
+                                itemsPerPage={limit}
+                                onPageChange={setPage}
+                                onLimitChange={(value) => {
+                                    setLimit(value);
+                                    setPage(1);
+                                }}
+                                availableLimits={[10, 20, 50, 100]}
                             />
-                        ))}
-                    </div>
+                        </div>
+                    </>
                 )}
             </div>
-
-            {/* Pagination */}
-            {pagination.total > 0 && (
-                <Pagination
-                    currentPage={pagination.page_no}
-                    totalItems={pagination.total}
-                    itemsPerPage={limit}
-                    onPageChange={setPage}
-                    onLimitChange={(value) => {
-                        setLimit(value);
-                        setPage(1);
-                    }}
-                    availableLimits={[10, 20, 50, 100]}
-                />
-            )}
 
             {/* Detail modal */}
             {selectedTxId && (

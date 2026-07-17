@@ -26,6 +26,7 @@ const Ledger = lazy(() => import("./pages/Ledger"));
 const Documents = lazy(() => import("./pages/Documents"));
 const FirmList = lazy(() => import("./pages/FirmList"));
 const FirmDetails = lazy(() => import("./pages/FirmDetails"));
+const WithdrawRequests = lazy(() => import("./pages/WithdrawRequests"));
 const OrderCreate = lazy(() => import("./pages/OrderCreate"));
 const OrderDetails = lazy(() => import("./pages/OrderDetails"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -105,6 +106,7 @@ function App() {
                     <Route path="services/:serviceId/order" element={<OrderCreate />} />
                     <Route path="services/:serviceId" element={<ServiceDetails />} />
                     <Route path="orders" element={<Orders />} />
+                    <Route path="withdraw-requests" element={<WithdrawRequests />} />
                     <Route path="orders/:orderId" element={<OrderDetails />} />
                     <Route path="documents" element={<Documents />} />
                     <Route path="firms" element={<FirmList />} />

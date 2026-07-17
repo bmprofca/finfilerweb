@@ -85,6 +85,7 @@ const DatePickerField = ({
   placeholder = 'Select date of birth',
   maxDate = new Date(),
   minYear = 1920,
+  variant = 'default',
 }) => {
   const containerRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -161,52 +162,114 @@ const DatePickerField = ({
 
   const today = new Date();
 
+  const handlePrevDay = (e) => {
+    e.stopPropagation();
+    const current = value ? parseIsoDate(value) : new Date();
+    if (!value) {
+       onChange(toIsoDate(current.getFullYear(), current.getMonth(), current.getDate()));
+       return;
+    }
+    current.setDate(current.getDate() - 1);
+    if (current.getFullYear() >= minYear) {
+      onChange(toIsoDate(current.getFullYear(), current.getMonth(), current.getDate()));
+    }
+  };
+
+  const handleNextDay = (e) => {
+    e.stopPropagation();
+    const current = value ? parseIsoDate(value) : new Date();
+    if (!value) {
+       onChange(toIsoDate(current.getFullYear(), current.getMonth(), current.getDate()));
+       return;
+    }
+    current.setDate(current.getDate() + 1);
+    if (current <= maxDate) {
+      onChange(toIsoDate(current.getFullYear(), current.getMonth(), current.getDate()));
+    }
+  };
+
+  const isAtMax = value ? (parseIsoDate(value) >= maxDate || isSameDay(parseIsoDate(value), maxDate)) : false;
+
   return (
     <div ref={containerRef} className="relative">
       {label && (
         <label className="mb-1 block text-sm font-medium text-secondary-foreground">{label}</label>
       )}
 
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className={`group flex w-full items-center gap-2.5 rounded-lg border bg-secondary px-3 py-2 text-left transition-all
-          ${open
-            ? 'border-indigo-500 ring-2 ring-indigo-500/20'
-            : 'border-border hover:border-indigo-400/60'
-          }`}
-      >
-        <span
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors
-            ${open ? 'bg-indigo-500 text-white' : 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400'}`}
+      {variant === 'navigator' ? (
+        <div className="flex items-center rounded-xl border border-border bg-primary h-10 w-fit">
+          <button
+            type="button"
+            onClick={handlePrevDay}
+            className="flex h-full w-10 items-center justify-center border-r border-border text-indigo-600 bg-secondary hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors rounded-l-xl"
+            aria-label="Previous day"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            className="flex h-full items-center gap-2 bg-secondary px-4 text-gray-100 dark:text-white outline-none transition-colors"
+          >
+            <Calendar size={15} className="text-indigo-600" />
+            <span className={`text-sm font-medium ${value ? 'text-primary-foreground' : 'text-secondary-foreground'}`}>
+              {value ? formatDisplayDate(value) : placeholder}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNextDay}
+            disabled={isAtMax && !!value}
+            className="flex h-full w-10 items-center justify-center border-l bg-secondary border-border text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors rounded-r-xl disabled:opacity-30 disabled:hover:bg-transparent"
+            aria-label="Next day"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+          className={`group flex w-full items-center gap-2.5 rounded-lg border bg-secondary px-3 py-2 text-left transition-all
+            ${open
+              ? 'border-indigo-500 ring-2 ring-indigo-500/20'
+              : 'border-border hover:border-indigo-400/60'
+            }`}
         >
-          <Calendar size={15} />
-        </span>
-        <span className={`min-w-0 flex-1 truncate text-sm ${value ? 'font-medium text-primary-foreground' : 'text-secondary-foreground'}`}>
-          {value ? formatDisplayDate(value) : placeholder}
-        </span>
-        {value && (
           <span
-            role="button"
-            tabIndex={0}
-            onClick={(event) => {
-              event.stopPropagation();
-              onChange('');
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors
+              ${open ? 'bg-indigo-500 text-white' : 'bg-indigo-500/10 text-indigo-500 dark:text-indigo-400'}`}
+          >
+            <Calendar size={15} />
+          </span>
+          <span className={`min-w-0 flex-1 truncate text-sm ${value ? 'font-medium text-primary-foreground' : 'text-secondary-foreground'}`}>
+            {value ? formatDisplayDate(value) : placeholder}
+          </span>
+          {value && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(event) => {
                 event.stopPropagation();
                 onChange('');
-              }
-            }}
-            className="shrink-0 rounded p-0.5 text-secondary-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
-            aria-label="Clear date"
-          >
-            <X size={14} />
-          </span>
-        )}
-      </button>
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onChange('');
+                }
+              }}
+              className="shrink-0 rounded p-0.5 text-secondary-foreground transition-colors hover:bg-red-500/10 hover:text-red-400"
+              aria-label="Clear date"
+            >
+              <X size={14} />
+            </span>
+          )}
+        </button>
+      )}
 
       <AnimatePresence>
         {open && (
