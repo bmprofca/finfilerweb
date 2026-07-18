@@ -7,7 +7,7 @@ import {
   Building2,
   Headphones,
   Wallet,
-  Headset,
+  HandCoins,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { clientRoute } from "../../constants/routes";
@@ -32,7 +32,7 @@ const Sidebar = ({
     { icon: FolderOpen, label: "Documents", path: clientRoute("/documents") },
     { icon: Building2, label: "Businesses", path: clientRoute("/firms") },
     { icon: Wallet, label: "Transactions", path: clientRoute("/ledger") },
-    { icon: Headset,label: "Withdraw Requests", path: clientRoute("/withdraw-requests")},
+    { icon: HandCoins, label: "Withdraw Requests", path: clientRoute("/withdraw-requests") },
     { icon: Headphones, label: "Support", path: clientRoute("/support") },
   ];
 
