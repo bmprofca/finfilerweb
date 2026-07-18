@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -267,7 +267,11 @@ export default function OrderCreate() {
 
   const firmOptions = useMemo(() => buildFirmSelectOptions(firms), [firms]);
 
+  const isFetching = useRef(false);
+
   const fetchData = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
 
@@ -322,6 +326,7 @@ export default function OrderCreate() {
       setError(err.message || "Failed to load order form.");
       toast.error("Failed to load order form.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [serviceId, toast]);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -648,7 +648,11 @@ export default function OrderDetails() {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
+  const isFetching = useRef(false);
+
   const fetchDetails = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
 
@@ -667,6 +671,7 @@ export default function OrderDetails() {
       setError(err.message || "Failed to load order details.");
       toast.error("Failed to load order details.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [orderId, toast]);

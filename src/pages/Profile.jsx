@@ -405,7 +405,11 @@ const Profile = () => {
     setAvatarPreview(data?.image ? resolveMediaUrl(data.image) : "");
   };
 
+  const isFetchingProfile = useRef(false);
+
   const fetchProfile = async () => {
+    if (isFetchingProfile.current) return;
+    isFetchingProfile.current = true;
     setLoadingProfile(true);
     try {
       const response = await apiCall("/accounts", "GET");
@@ -418,6 +422,7 @@ const Profile = () => {
     } catch {
       toast.error("Something went wrong while loading profile.");
     } finally {
+      isFetchingProfile.current = false;
       setLoadingProfile(false);
     }
   };

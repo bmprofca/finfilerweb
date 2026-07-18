@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -123,7 +123,11 @@ export default function WithdrawalList() {
     setDate("");
   };
 
+  const isFetching = useRef(false);
+
   const fetchWithdrawals = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -152,6 +156,7 @@ export default function WithdrawalList() {
       setError(err.message || "Failed to load withdrawals.");
       toast.error("Failed to load withdrawals.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [pageNo, limit, debouncedSearch, status, paymentMethod, date, toast]);

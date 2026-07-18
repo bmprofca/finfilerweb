@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -202,7 +202,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const isFetching = useRef(false);
+
   const fetchDashboard = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
 
@@ -219,6 +223,7 @@ export default function Home() {
       setError(err.message || "Failed to load dashboard.");
       toast.error("Failed to load dashboard.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [toast]);

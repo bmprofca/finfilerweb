@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -164,7 +164,11 @@ export default function Services() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState([]);
 
+  const isFetchingCategories = useRef(false);
+
   useEffect(() => {
+    if (isFetchingCategories.current) return;
+    isFetchingCategories.current = true;
     let isMounted = true;
 
     apiCall("/services/categories")
@@ -176,6 +180,9 @@ export default function Services() {
       })
       .catch((err) => {
         console.error("Failed to fetch service categories:", err);
+      })
+      .finally(() => {
+        isFetchingCategories.current = false;
       });
 
     return () => {
@@ -188,7 +195,11 @@ export default function Services() {
     ...categories.map((category) => ({ id: category, label: category })),
   ];
 
+  const isFetching = useRef(false);
+
   const fetchServices = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -211,6 +222,7 @@ export default function Services() {
       setError(err.message || "Server error. Failed to load services.");
       toast.error("Failed to load services. Please check your network.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [toast, activeTab, searchQuery]);

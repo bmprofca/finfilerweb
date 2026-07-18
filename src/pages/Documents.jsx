@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -256,7 +256,11 @@ export default function Documents() {
     setPageNo(1);
   }, [debouncedSearch, firmFilter]);
 
+  const isFetchingFirms = useRef(false);
+
   const fetchFirms = useCallback(async () => {
+    if (isFetchingFirms.current) return;
+    isFetchingFirms.current = true;
     try {
       const response = await apiCall("/firms/list?page_no=1&limit=100");
       const body = await response.json();
@@ -271,10 +275,16 @@ export default function Documents() {
       }
     } catch {
       toast.error("Failed to load businesses.");
+    } finally {
+      isFetchingFirms.current = false;
     }
   }, [toast]);
 
+  const isFetchingDocs = useRef(false);
+
   const fetchDocuments = useCallback(async () => {
+    if (isFetchingDocs.current) return;
+    isFetchingDocs.current = true;
     setLoading(true);
     setError(null);
 
@@ -302,6 +312,7 @@ export default function Documents() {
       setError(err.message || "Failed to load documents.");
       toast.error("Failed to load documents.");
     } finally {
+      isFetchingDocs.current = false;
       setLoading(false);
     }
   }, [pageNo, limit, debouncedSearch, firmFilter, toast]);

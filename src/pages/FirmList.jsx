@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -71,7 +71,11 @@ export default function FirmList() {
     setPageNo(1);
   }, [debouncedSearch]);
 
+  const isFetching = useRef(false);
+
   const fetchFirms = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -89,6 +93,7 @@ export default function FirmList() {
       setError(err.message || "Failed to load businesses.");
       toast.error("Failed to load businesses.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [pageNo, limit, debouncedSearch, toast]);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { apiCall } from "../utils/apiCall";
 import { AUTH_UNAUTHORIZED_EVENT, clearAuthStorage } from "../utils/authSession";
 
@@ -28,7 +28,12 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, onUnauthorized);
   }, []);
 
+  const authCheckRef = useRef(false);
+
   useEffect(() => {
+    if (authCheckRef.current) return;
+    authCheckRef.current = true;
+
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
 

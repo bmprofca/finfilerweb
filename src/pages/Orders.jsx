@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
@@ -155,7 +155,11 @@ export default function Orders() {
     setPageNo(1);
   }, [searchQuery, activeFilter]);
 
+  const isFetching = useRef(false);
+
   const fetchOrders = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     setError(null);
 
@@ -181,6 +185,7 @@ export default function Orders() {
       setError(err.message || "Failed to load orders.");
       toast.error("Failed to load orders.");
     } finally {
+      isFetching.current = false;
       setLoading(false);
     }
   }, [pageNo, limit, searchQuery, activeFilter, toast]);
