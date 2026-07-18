@@ -148,13 +148,12 @@ function PriceLine({ label, value, accent, muted }) {
         {label}
       </span>
       <span
-        className={`shrink-0 whitespace-nowrap tabular-nums ${
-          accent
+        className={`shrink-0 whitespace-nowrap tabular-nums ${accent
             ? "font-semibold text-emerald-600"
             : muted
               ? "text-secondary-foreground"
               : "font-semibold text-primary-foreground"
-        }`}
+          }`}
       >
         {value}
       </span>
@@ -678,7 +677,7 @@ export default function OrderDetails() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl py-4 sm:py-6">
+      <div className="mx-auto w-full py-4 sm:py-6">
         <DetailSkeleton />
       </div>
     );
@@ -686,7 +685,7 @@ export default function OrderDetails() {
 
   if (error || !order) {
     return (
-      <div className="mx-auto max-w-6xl py-8 text-center">
+      <div className="mx-auto w-full py-8 text-center">
         <AlertCircle className="mx-auto mb-4 h-10 w-10 text-red-500" />
         <p className="mb-4 text-red-500">{error || "Order not found."}</p>
         <button
@@ -777,7 +776,7 @@ export default function OrderDetails() {
 
   return (
     <motion.div
-      className="mx-auto max-w-6xl"
+      className="mx-auto w-full"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
     >

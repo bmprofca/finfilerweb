@@ -111,13 +111,12 @@ function PriceRow({ label, value, muted, accent }) {
         {label}
       </span>
       <span
-        className={`shrink-0 whitespace-nowrap tabular-nums ${
-          accent
+        className={`shrink-0 whitespace-nowrap tabular-nums ${accent
             ? "font-semibold text-emerald-600"
             : muted
               ? "text-secondary-foreground"
               : "font-semibold text-primary-foreground"
-        }`}
+          }`}
       >
         {value}
       </span>
@@ -297,7 +296,7 @@ export default function ServiceDetails() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-6xl py-6">
+      <div className="mx-auto w-full py-6">
         <DetailSkeleton />
       </div>
     );
@@ -305,7 +304,7 @@ export default function ServiceDetails() {
 
   if (error || !service) {
     return (
-      <div className="mx-auto max-w-6xl py-10 text-center">
+      <div className="mx-auto w-full py-10 text-center">
         <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
         <h1 className="text-xl font-bold text-primary-foreground">
           Service Not Found
@@ -335,7 +334,7 @@ export default function ServiceDetails() {
 
   return (
     <motion.div
-      className="mx-auto max-w-6xl py-4 sm:py-6"
+      className="mx-auto w-full py-4 sm:py-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}

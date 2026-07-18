@@ -127,21 +127,29 @@ export const payForOrderWithWallet = async (
   orderId,
   { amount, walletAmount = 0, razorpayAmount, gstNo, onDismiss } = {},
 ) => {
-  const data = await initiateOrderPayment(orderId, amount, gstNo, walletAmount);
+  // `amount` passed to the API should be what's charged via bank/UPI,
+  // not the session total. wallet_amount covers the rest.
+  const bankAmount = razorpayAmount ?? Math.max(0, (amount ?? 0) - walletAmount);
 
-  // If there's nothing to pay via Razorpay (wallet covered it all)
-  if (!razorpayAmount || razorpayAmount <= 0) {
-    // The server already processed the wallet deduction on initiate
-    // Return the data directly (no Razorpay checkout needed)
+  // Wallet can only be a partial contribution — at least ₹1 must go to bank/UPI.
+  if (walletAmount > 0 && bankAmount < 1) {
+    throw new Error('At least ₹1 must be paid via UPI / Bank when using wallet balance.');
+  }
+
+  const data = await initiateOrderPayment(orderId, bankAmount, gstNo, walletAmount);
+
+  // If bankAmount is 0 (no Razorpay needed), return immediately
+  if (!bankAmount || bankAmount <= 0) {
     return data;
   }
 
-  // Otherwise open Razorpay for the remaining amount
+  // Open Razorpay for the bank/UPI portion
   const { key_id: keyId, checkout } = data;
   const paymentResponse = await openRazorpayCheckout({ keyId, checkout, onDismiss });
   const verified = await verifyRazorpayPayment(orderId, paymentResponse);
   return verified;
 };
+
 
 
 export const downloadPaymentInvoice = async (orderId, paymentId) => {

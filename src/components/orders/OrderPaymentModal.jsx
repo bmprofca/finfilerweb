@@ -142,9 +142,11 @@ export default function OrderPaymentModal({
   }, [isOpen, order, fetchWalletBalance]);
 
   // ── pre-fill wallet amount when toggle turns on ──────────────────────────────
+  // Wallet can only be a partial contribution — at least ₹1 must go to bank/UPI.
   useEffect(() => {
     if (useWallet && walletBalance !== null && walletAmt === "") {
-      const suggested = Math.min(walletBalance, sessionTotal > 0 ? sessionTotal : remainingAmount);
+      const cap = (sessionTotal > 0 ? sessionTotal : remainingAmount) - 1;
+      const suggested = Math.min(walletBalance, Math.max(0, cap));
       setWalletAmt(suggested > 0 ? String(suggested) : "");
     }
     if (!useWallet) {
@@ -165,8 +167,10 @@ export default function OrderPaymentModal({
       if (parseAmount(walletAmt) <= 0) return "Enter a valid wallet amount.";
       if (parseAmount(walletAmt) > (walletBalance ?? 0))
         return `Wallet amount cannot exceed your balance of ${formatCurrency(walletBalance)}.`;
-      if (effectiveWalletAmt > sessionTotal)
-        return "Wallet amount cannot exceed the payment amount.";
+      if (effectiveWalletAmt >= sessionTotal)
+        return "Wallet cannot cover the full amount. At least ₹1 must be paid via UPI / Bank.";
+      if (razorpayAmt < 1)
+        return "At least ₹1 must be paid via UPI / Bank when using wallet.";
     }
 
     const trimmedGst = gstNo.trim().toUpperCase();
@@ -471,7 +475,10 @@ export default function OrderPaymentModal({
                         id="wallet-amount"
                         type="number"
                         min="1"
-                        max={Math.min(walletBalance ?? 0, sessionTotal > 0 ? sessionTotal : remainingAmount)}
+                        max={Math.min(
+                          walletBalance ?? 0,
+                          Math.max(0, (sessionTotal > 0 ? sessionTotal : remainingAmount) - 1),
+                        )}
                         step="1"
                         value={walletAmt}
                         onChange={(e) => {
@@ -486,8 +493,12 @@ export default function OrderPaymentModal({
                     <p className="mt-1 text-xs text-secondary-foreground">
                       Max usable:{" "}
                       {formatCurrency(
-                        Math.min(walletBalance ?? 0, sessionTotal > 0 ? sessionTotal : remainingAmount)
+                        Math.min(
+                          walletBalance ?? 0,
+                          Math.max(0, (sessionTotal > 0 ? sessionTotal : remainingAmount) - 1),
+                        )
                       )}
+                      <span className="ml-1 text-secondary-foreground/60">(₹1 min via UPI/Bank)</span>
                     </p>
                   </div>
 
