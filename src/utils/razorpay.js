@@ -26,13 +26,16 @@ export const loadRazorpayScript = () => {
   return scriptPromise;
 };
 
-export const initiateOrderPayment = async (orderId, amount, gstNo) => {
+export const initiateOrderPayment = async (orderId, amount, gstNo, walletAmount) => {
   const payload = { order_id: orderId };
   if (amount !== undefined && amount !== null && amount !== '') {
     payload.amount = Number(amount);
   }
   if (gstNo !== undefined && gstNo !== null && gstNo !== '') {
     payload.gst_no = gstNo;
+  }
+  if (walletAmount !== undefined && walletAmount !== null && Number(walletAmount) > 0) {
+    payload.wallet_amount = Number(walletAmount);
   }
 
   const response = await apiCall('/orders/payments/initiate', 'POST', payload);
@@ -114,6 +117,32 @@ export const payForOrder = async (orderId, { amount, gstNo, onDismiss } = {}) =>
   const verified = await verifyRazorpayPayment(orderId, paymentResponse);
   return verified;
 };
+
+/**
+ * Pay for an order with optional wallet split.
+ * - If razorpayAmount > 0: initiates payment, opens Razorpay for razorpayAmount, then verifies.
+ * - If razorpayAmount === 0 (wallet covers all): initiates with wallet_amount only, no Razorpay checkout.
+ */
+export const payForOrderWithWallet = async (
+  orderId,
+  { amount, walletAmount = 0, razorpayAmount, gstNo, onDismiss } = {},
+) => {
+  const data = await initiateOrderPayment(orderId, amount, gstNo, walletAmount);
+
+  // If there's nothing to pay via Razorpay (wallet covered it all)
+  if (!razorpayAmount || razorpayAmount <= 0) {
+    // The server already processed the wallet deduction on initiate
+    // Return the data directly (no Razorpay checkout needed)
+    return data;
+  }
+
+  // Otherwise open Razorpay for the remaining amount
+  const { key_id: keyId, checkout } = data;
+  const paymentResponse = await openRazorpayCheckout({ keyId, checkout, onDismiss });
+  const verified = await verifyRazorpayPayment(orderId, paymentResponse);
+  return verified;
+};
+
 
 export const downloadPaymentInvoice = async (orderId, paymentId) => {
   const response = await apiCall('/orders/payments/invoice', 'POST', {
