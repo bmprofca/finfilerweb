@@ -32,6 +32,7 @@ const OrderDetails = lazy(() => import("./pages/OrderDetails"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Support = lazy(() => import("./pages/Support"));
+const ReferAndEarn = lazy(() => import("./pages/ReferAndEarn"));
 
 // Public website pages
 const PublicHome = lazy(() => import("./pages/public/Home"));
@@ -113,6 +114,7 @@ function App() {
                     <Route path="firms/:firmId" element={<FirmDetails />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="support" element={<Support />} />
+                    <Route path="refer-and-earn" element={<ReferAndEarn />} />
                   </Route>
 
                   {/* Legacy redirects */}

@@ -9,6 +9,7 @@ import {
   Loader2,
   ChevronLeft,
   RotateCcw,
+  Gift,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PublicNavbar from "../components/public/Navbar";
@@ -120,6 +121,7 @@ export default function Register() {
     last_name: "",
     email: "",
     mobile: "",
+    referral_code: "",
   });
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -252,6 +254,9 @@ export default function Register() {
           middle_name: form.middle_name.trim(),
         }),
         ...(form.email.trim() && { email: form.email.trim() }),
+        ...(form.referral_code.trim() && {
+          referral_code: form.referral_code.trim(),
+        }),
       };
 
       const response = await apiCall(
@@ -328,10 +333,10 @@ export default function Register() {
           className="w-full max-w-sm mx-auto min-w-0 my-auto"
         >
           {/* Logo */}
-          <motion.div variants={itemVariants} className="mb-5 min-w-0">
+          <motion.div variants={itemVariants} className="mb-3 min-w-0">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 mb-4 sm:mb-5 max-w-full"
+              className="inline-flex items-center gap-2 mb-3 sm:mb-3 max-w-full"
             >
               <div className="flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-200 overflow-hidden">
                 <img src="/logo192.png" alt="FinFiler" className="h-6 w-6 sm:h-7 sm:w-7 object-contain" />
@@ -342,7 +347,7 @@ export default function Register() {
             </Link>
 
             {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <div
                 className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? "bg-indigo-600" : "bg-border"}`}
               />
@@ -379,7 +384,7 @@ export default function Register() {
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-foreground">
                     Verify OTP
                   </h1>
-                  <p className="mt-1 text-sm text-secondary-foreground">
+                  <p className="mt-1.5 text-sm text-secondary-foreground">
                     Enter the 6-digit code sent to{" "}
                     <span className="font-semibold text-primary-foreground">
                       {form.mobile}
@@ -401,12 +406,12 @@ export default function Register() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="space-y-3"
+                  className="space-y-2"
                   onSubmit={handleSendOtp}
                   noValidate
                 >
                   {/* First Name + Last Name */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label
                         className={fieldLabelClass(fieldErrors.first_name)}
@@ -453,13 +458,13 @@ export default function Register() {
 
                   {/* Middle Name (optional) */}
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-primary-foreground">
+                    <label className="mb-0.5 block text-xs font-semibold text-primary-foreground">
                       Middle Name{" "}
                       <span className="text-secondary-foreground font-normal">
                         (optional)
                       </span>
                     </label>
-                    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-primary px-3.5 py-3 transition-all focus-within:border-indigo-500 focus-within:bg-secondary focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-indigo-500/30">
+                    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-primary px-3.5 py-2 transition-all focus-within:border-indigo-500 focus-within:bg-secondary focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-indigo-500/30">
                       <User
                         size={16}
                         className="text-secondary-foreground flex-shrink-0"
@@ -522,12 +527,36 @@ export default function Register() {
                     </div>
                   </div>
 
+                  {/* Referral Code (optional) */}
+                  <div>
+                    <label className="mb-0.5 block text-xs font-semibold text-primary-foreground">
+                      Referral Code{" "}
+                      <span className="text-secondary-foreground font-normal">
+                        (optional)
+                      </span>
+                    </label>
+                    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-primary px-3.5 py-2 transition-all focus-within:border-indigo-500 focus-within:bg-secondary focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-indigo-500/30">
+                      <Gift
+                        size={16}
+                        className="text-secondary-foreground flex-shrink-0"
+                      />
+                      <input
+                        type="text"
+                        name="referral_code"
+                        value={form.referral_code}
+                        onChange={handleChange}
+                        placeholder="Enter referral code"
+                        className="w-full bg-transparent text-sm text-primary-foreground outline-none placeholder:text-secondary-foreground"
+                      />
+                    </div>
+                  </div>
+
                   <motion.button
                     whileHover={{ scale: loading ? 1 : 1.02 }}
                     whileTap={{ scale: loading ? 1 : 0.98 }}
                     type="submit"
                     disabled={loading}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 mt-2 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 mt-2 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <>
@@ -636,7 +665,7 @@ export default function Register() {
 
           <motion.p
             variants={itemVariants}
-            className="mt-5 text-center text-xs text-secondary-foreground"
+            className="mt-3 text-center text-xs text-secondary-foreground"
           >
             Already have an account?{" "}
             <Link

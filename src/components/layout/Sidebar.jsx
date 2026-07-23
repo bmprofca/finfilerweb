@@ -8,6 +8,7 @@ import {
   Headphones,
   Wallet,
   HandCoins,
+  Gift,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { clientRoute } from "../../constants/routes";
@@ -33,6 +34,7 @@ const Sidebar = ({
     { icon: Building2, label: "Businesses", path: clientRoute("/firms") },
     { icon: Wallet, label: "Transactions", path: clientRoute("/ledger") },
     { icon: HandCoins, label: "Withdraw Requests", path: clientRoute("/withdraw-requests") },
+    { icon: Gift, label: "Refer & Earn", path: clientRoute("/refer-and-earn") },
     { icon: Headphones, label: "Support", path: clientRoute("/support") },
   ];
 
