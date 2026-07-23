@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Gift,
@@ -405,6 +405,7 @@ export default function ReferAndEarn() {
   const [creatingId, setCreatingId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [referralCode, setReferralCode] = useState("");
+  const fetchedRef = useRef(false);
 
   const fetchOffers = useCallback(async () => {
     try {
@@ -425,6 +426,8 @@ export default function ReferAndEarn() {
   }, [toast]);
 
   useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchOffers();
   }, [fetchOffers]);
 
