@@ -114,6 +114,7 @@ export default function Register() {
 
   const [step, setStep] = useState(1); // 1 = Registration form, 2 = OTP verification
   const [direction, setDirection] = useState(1);
+  const [showReferral, setShowReferral] = useState(false);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -527,29 +528,56 @@ export default function Register() {
                     </div>
                   </div>
 
-                  {/* Referral Code (optional) */}
-                  <div>
-                    <label className="mb-0.5 block text-xs font-semibold text-primary-foreground">
-                      Referral Code{" "}
-                      <span className="text-secondary-foreground font-normal">
-                        (optional)
-                      </span>
+                  {/* Referral Code Toggle */}
+                  <div className="flex items-center gap-2 pt-1 pb-1">
+                    <input
+                      type="checkbox"
+                      id="has_referral"
+                      checked={showReferral}
+                      onChange={(e) => {
+                        setShowReferral(e.target.checked);
+                        if (!e.target.checked) {
+                          setForm(prev => ({ ...prev, referral_code: "" }));
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-border bg-transparent text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
+                    />
+                    <label htmlFor="has_referral" className="text-sm font-medium text-primary-foreground cursor-pointer select-none">
+                      I have a referral code
                     </label>
-                    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-primary px-3.5 py-2 transition-all focus-within:border-indigo-500 focus-within:bg-secondary focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-indigo-500/30">
-                      <Gift
-                        size={16}
-                        className="text-secondary-foreground flex-shrink-0"
-                      />
-                      <input
-                        type="text"
-                        name="referral_code"
-                        value={form.referral_code}
-                        onChange={handleChange}
-                        placeholder="Enter referral code"
-                        className="w-full bg-transparent text-sm text-primary-foreground outline-none placeholder:text-secondary-foreground"
-                      />
-                    </div>
                   </div>
+
+                  {/* Referral Code Input */}
+                  <AnimatePresence>
+                    {showReferral && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-1">
+                          <label className="mb-0.5 block text-xs font-semibold text-primary-foreground">
+                            Referral Code
+                          </label>
+                          <div className="flex items-center gap-2.5 rounded-xl border border-border bg-primary px-3.5 py-2 transition-all focus-within:border-indigo-500 focus-within:bg-secondary focus-within:ring-4 focus-within:ring-indigo-500/10 hover:border-indigo-500/30">
+                            <Gift
+                              size={16}
+                              className="text-secondary-foreground flex-shrink-0"
+                            />
+                            <input
+                              type="text"
+                              name="referral_code"
+                              value={form.referral_code}
+                              onChange={handleChange}
+                              placeholder="Enter referral code"
+                              className="w-full bg-transparent text-sm text-primary-foreground outline-none placeholder:text-secondary-foreground"
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <motion.button
                     whileHover={{ scale: loading ? 1 : 1.02 }}
