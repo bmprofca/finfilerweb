@@ -19,6 +19,8 @@ import {
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
 import ReferralBonuses from "./ReferralBonuses";
+import MyReferredUsers from "./MyReferredUsers";
+import ReferredUserStats from "./ReferredUserStats";
 import ManagementHub from "../components/common/ManagementHub";
 
 const containerVariants = {
@@ -249,9 +251,7 @@ function OfferCard({ offer, onRefer, isCreating }) {
               </p>
             )}
           </div>
-          <span className="shrink-0 rounded-lg bg-indigo-500/10 px-2.5 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-            {offer.offer_code}
-          </span>
+          
         </div>
 
         {/* Bonus details */}
@@ -456,6 +456,8 @@ export default function ReferAndEarn() {
   const TABS = [
     { id: "offers", label: "Referral Offers", icon: Gift },
     { id: "earnings", label: "My Earnings", icon: Trophy },
+    { id: "referred", label: "My Referrals", icon: Users },
+    { id: "stats", label: "Referral Stats", icon: CalendarDays },
   ];
 
   return (
@@ -525,7 +527,7 @@ export default function ReferAndEarn() {
               </div>
             )}
           </motion.div>
-        ) : (
+        ) : activeTab === "earnings" ? (
           <motion.div
             key="earnings-tab"
             initial={{ opacity: 0, y: 10 }}
@@ -533,6 +535,24 @@ export default function ReferAndEarn() {
             transition={{ duration: 0.2 }}
           >
             <ReferralBonuses />
+          </motion.div>
+        ) : activeTab === "referred" ? (
+          <motion.div
+            key="referred-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <MyReferredUsers />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="stats-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ReferredUserStats />
           </motion.div>
         )}
       </ManagementHub>
