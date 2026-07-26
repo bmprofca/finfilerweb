@@ -224,101 +224,90 @@ function OfferCard({ offer, onRefer, isCreating }) {
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -3 }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-primary shadow-sm transition-all hover:border-indigo-500/30 hover:shadow-lg"
+      whileHover={{ y: -4, scale: 1.01 }}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-primary shadow-sm transition-all hover:border-violet-500/30 hover:shadow-xl"
     >
+      {/* Dynamic Background Glow */}
+      <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl transition-all group-hover:bg-violet-500/20" />
+      
       {/* Top accent bar */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-5 relative z-10">
         {/* Offer header */}
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/15 to-violet-500/10">
-                <Gift
-                  size={16}
-                  className="text-indigo-600 dark:text-indigo-400"
-                />
-              </div>
-              <h3 className="truncate text-base font-bold text-primary-foreground">
-                {offer.offer_name}
-              </h3>
-            </div>
+        <div className="mb-5 flex items-start gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 shadow-inner">
+            <Gift
+              size={22}
+              className="text-violet-600 dark:text-violet-400"
+            />
+          </div>
+          <div className="min-w-0 flex-1 pt-1">
+            <h3 className="truncate text-lg font-bold text-primary-foreground leading-tight">
+              {offer.offer_name}
+            </h3>
             {offer.description && (
-              <p className="mt-1 text-sm text-secondary-foreground line-clamp-2">
+              <p className="mt-1.5 text-xs text-secondary-foreground line-clamp-2">
                 {offer.description}
               </p>
             )}
           </div>
-          
         </div>
 
-        {/* Bonus details */}
-        <div className="mb-4 grid grid-cols-2 gap-3">
-          {/* You earn */}
-          <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-green-500/5 border border-emerald-500/15 p-3">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <Trophy size={12} />
+        {/* Bonus details - Big prominent block */}
+        <div className="mb-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 p-4 shadow-sm relative overflow-hidden">
+          {/* subtle decoration inside the bonus card */}
+          <div className="absolute right-0 top-0 -mr-6 -mt-6 opacity-20 transform rotate-12">
+             <Trophy size={80} className="text-emerald-500" />
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              <Trophy size={14} />
               You Earn
             </div>
-            <p className="mt-1 text-lg font-bold text-emerald-600 dark:text-emerald-400">
-              {formatBonusValue(
-                offer.referrer_bonus_type,
-                offer.referrer_bonus_value
-              )}
-            </p>
-            <p className="text-[11px] text-secondary-foreground">
-              on each order by referral
-            </p>
-          </div>
-
-          {/* Friend gets */}
-          <div className="rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/5 border border-blue-500/15 p-3">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-blue-700 dark:text-blue-400">
-              <Users size={12} />
-              Friend Gets
+            <div className="mt-1 flex items-end gap-2">
+              <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
+                {formatBonusValue(
+                  offer.referrer_bonus_type,
+                  offer.referrer_bonus_value
+                )}
+              </span>
             </div>
-            <p className="mt-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-              {formatBonusValue(
-                offer.referee_bonus_type,
-                offer.referee_bonus_value
-              )}
-            </p>
-            <p className="text-[11px] text-secondary-foreground">
-              bonus on sign up
+            <p className="mt-2 text-xs font-medium text-emerald-800/80 dark:text-emerald-300/80">
+               When your friend signs up and places an order
             </p>
           </div>
         </div>
 
         {/* Extra info — only shown when there's data */}
-        <div className={`${hasExtras ? "mb-4" : "mb-2"} space-y-2`}>
+        <div className={`${hasExtras ? "mb-5" : "mb-4"} space-y-2.5`}>
           {offer.max_bonus_amount != null && offer.max_bonus_amount > 0 && (
-            <div className="flex items-center gap-2 text-xs text-secondary-foreground">
+            <div className="flex items-center gap-2 text-xs font-medium text-secondary-foreground">
               <BonusIcon type="fixed" />
               <span>
                 Max bonus:{" "}
-                <span className="font-semibold text-primary-foreground">
+                <span className="font-bold text-primary-foreground">
                   ₹{offer.max_bonus_amount}
                 </span>
               </span>
             </div>
           )}
           {offer.min_order_amount != null && offer.min_order_amount > 0 && (
-            <div className="flex items-center gap-2 text-xs text-secondary-foreground">
-              <ShoppingCart size={14} className="flex-shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-medium text-secondary-foreground">
+              <ShoppingCart size={14} className="flex-shrink-0 text-violet-500" />
               <span>
                 Min order:{" "}
-                <span className="font-semibold text-primary-foreground">
+                <span className="font-bold text-primary-foreground">
                   ₹{offer.min_order_amount}
                 </span>
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2 text-xs text-secondary-foreground">
-            <CalendarDays size={14} className="flex-shrink-0" />
+          <div className="flex items-center gap-2 text-xs font-medium text-secondary-foreground">
+            <CalendarDays size={14} className="flex-shrink-0 text-violet-500" />
             <span>
-              Valid: {formatDate(offer.effective_from)}
+              Valid: <span className="font-semibold text-primary-foreground">{formatDate(offer.effective_from)}</span>
               {offer.effective_to
                 ? ` – ${formatDate(offer.effective_to)}`
                 : " onwards"}
@@ -327,22 +316,22 @@ function OfferCard({ offer, onRefer, isCreating }) {
         </div>
 
         {/* Refer button */}
-        <div className="mt-auto pt-1">
+        <div className="mt-auto pt-2 border-t border-border/50">
           <motion.button
             whileHover={{ scale: isCreating ? 1 : 1.02 }}
             whileTap={{ scale: isCreating ? 1 : 0.98 }}
             onClick={() => onRefer(offer.refer_offer_id)}
             disabled={isCreating}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:from-indigo-700 hover:to-violet-700 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="group/btn flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:bg-violet-700 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isCreating ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
-                Creating…
+                <Loader2 size={18} className="animate-spin" />
+                Generating Code…
               </>
             ) : (
               <>
-                Refer Now <ArrowRight size={16} />
+                Refer Now <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-1" />
               </>
             )}
           </motion.button>
@@ -376,22 +365,23 @@ function EmptyState() {
 /* ── Loading Skeleton ───────────────────────────────────────────────── */
 function OfferSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-primary overflow-hidden">
+    <div className="rounded-2xl border border-border bg-primary overflow-hidden relative">
       <div className="h-1.5 w-full bg-border animate-pulse" />
-      <div className="p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-border animate-pulse" />
-          <div className="h-5 w-32 rounded-lg bg-border animate-pulse" />
+      <div className="p-5 space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-xl bg-border animate-pulse shrink-0" />
+          <div className="h-6 w-3/4 rounded-lg bg-border animate-pulse" />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="h-20 rounded-xl bg-border animate-pulse" />
-          <div className="h-20 rounded-xl bg-border animate-pulse" />
+        
+        {/* Single big block for bonus */}
+        <div className="h-28 rounded-2xl bg-border animate-pulse" />
+        
+        <div className="space-y-2.5">
+          <div className="h-4 w-5/6 rounded bg-border animate-pulse" />
+          <div className="h-4 w-2/3 rounded bg-border animate-pulse" />
         </div>
-        <div className="space-y-2">
-          <div className="h-3 w-40 rounded bg-border animate-pulse" />
-          <div className="h-3 w-36 rounded bg-border animate-pulse" />
-        </div>
-        <div className="h-10 rounded-xl bg-border animate-pulse" />
+        
+        <div className="h-12 rounded-xl bg-border animate-pulse mt-4" />
       </div>
     </div>
   );
@@ -509,13 +499,13 @@ export default function ReferAndEarn() {
 
             {/* Offers grid */}
             {loading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {[1, 2, 3].map((i) => <OfferSkeleton key={i} />)}
               </div>
             ) : offers.length === 0 ? (
               <EmptyState />
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {offers.map((offer) => (
                   <OfferCard
                     key={offer.refer_offer_id}
