@@ -16,9 +16,10 @@ import {
   ShoppingCart,
   Trophy,
 } from "lucide-react";
-import PageHeader from "../components/common/PageHeader";
 import { apiCall } from "../utils/apiCall";
 import { useToast } from "../contexts/ToastContext";
+import ReferralBonuses from "./ReferralBonuses";
+import ManagementHub from "../components/common/ManagementHub";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -399,6 +400,7 @@ function OfferSkeleton() {
 /* ── Main Page ──────────────────────────────────────────────────────── */
 export default function ReferAndEarn() {
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState("offers"); // "offers" or "earnings"
 
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -451,91 +453,89 @@ export default function ReferAndEarn() {
     }
   };
 
+  const TABS = [
+    { id: "offers", label: "Referral Offers", icon: Gift },
+    { id: "earnings", label: "My Earnings", icon: Trophy },
+  ];
+
   return (
     <>
-      <motion.div
-        className="mx-auto"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+      <ManagementHub
+        eyebrow="Rewards"
+        title="Refer & Earn"
+        description="Invite your friends to FinFiler and earn exciting rewards when they sign up and place orders."
+        accent="indigo"
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        widthClassName=""
       >
-        <motion.div variants={itemVariants}>
-          <PageHeader
-            eyebrow="Rewards"
-            title="Refer & Earn"
-            description="Invite your friends to FinFiler and earn exciting rewards when they sign up and place orders."
-          />
-        </motion.div>
-
-        {/* How it works */}
-        <motion.div
-          variants={itemVariants}
-          className="mb-6 rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 p-4 sm:p-5"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles
-              size={18}
-              className="text-indigo-600 dark:text-indigo-400"
-            />
-            <h2 className="text-sm font-bold text-primary-foreground">
-              How it works
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              {
-                step: "1",
-                title: "Choose an offer",
-                desc: "Pick an offer & get your referral code",
-              },
-              {
-                step: "2",
-                title: "Share your code",
-                desc: "Friends sign up using your code",
-              },
-              {
-                step: "3",
-                title: "Earn on every order",
-                desc: "Get bonus each time they place an order",
-              },
-            ].map((s) => (
-              <div key={s.step} className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-                  {s.step}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-primary-foreground">
-                    {s.title}
-                  </p>
-                  <p className="text-xs text-secondary-foreground">{s.desc}</p>
-                </div>
+        {activeTab === "offers" ? (
+          <motion.div
+            key="offers-tab"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* How it works */}
+            <motion.div
+              variants={itemVariants}
+              className="mb-6 rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-violet-500/5 p-4 sm:p-5"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles size={18} className="text-indigo-600 dark:text-indigo-400" />
+                <h2 className="text-sm font-bold text-primary-foreground">How it works</h2>
               </div>
-            ))}
-          </div>
-        </motion.div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { step: "1", title: "Choose an offer", desc: "Pick an offer & get your referral code" },
+                  { step: "2", title: "Share your code", desc: "Friends sign up using your code" },
+                  { step: "3", title: "Earn on every order", desc: "Get bonus each time they place an order" },
+                ].map((s) => (
+                  <div key={s.step} className="flex items-start gap-3">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                      {s.step}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-primary-foreground">{s.title}</p>
+                      <p className="text-xs text-secondary-foreground">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
 
-        {/* Offers grid */}
-        {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <OfferSkeleton key={i} />
-            ))}
-          </div>
-        ) : offers.length === 0 ? (
-          <EmptyState />
+            {/* Offers grid */}
+            {loading ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => <OfferSkeleton key={i} />)}
+              </div>
+            ) : offers.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {offers.map((offer) => (
+                  <OfferCard
+                    key={offer.refer_offer_id}
+                    offer={offer}
+                    onRefer={handleRefer}
+                    isCreating={creatingId === offer.refer_offer_id}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {offers.map((offer) => (
-              <OfferCard
-                key={offer.refer_offer_id}
-                offer={offer}
-                onRefer={handleRefer}
-                isCreating={creatingId === offer.refer_offer_id}
-              />
-            ))}
-          </div>
+          <motion.div
+            key="earnings-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ReferralBonuses />
+          </motion.div>
         )}
-      </motion.div>
+      </ManagementHub>
 
       {/* Referral code modal */}
       <ReferralCodeModal

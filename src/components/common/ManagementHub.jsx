@@ -56,20 +56,13 @@ export default function ManagementHub({
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-4 rounded-lg border border-border bg-secondary/90 p-2.5 shadow-sm shadow-slate-200/40 backdrop-blur md:p-3"
+          className="mb-4"
         >
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              {eyebrow && (
-                <div className={joinClasses(
-                  'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em]',
-                  accentClass
-                )}>
-                  {eyebrow}
-                </div>
-              )}
-              {title && <h1 className="mt-1 text-lg font-bold text-primary-foreground md:text-xl">{title}</h1>}
-              {description && <p className="mt-0.5 text-xs text-secondary-foreground">{description}</p>}
+              
+              {title && <h1 className="font-semibold tracking-tight text-primary-foreground text-xl sm:text-2xl ">{title}</h1>}
+              {description && <p className="mt-0.5 text-sm text-secondary-foreground">{description}</p>}
             </div>
 
             {(summary || actions || onRefresh) && (
