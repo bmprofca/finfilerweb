@@ -262,19 +262,40 @@ function OfferCard({ offer, onRefer, isCreating }) {
           </div>
           
           <div className="relative z-10">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
               <Trophy size={14} />
               You Earn
             </div>
-            <div className="mt-1 flex items-end gap-2">
-              <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
-                {formatBonusValue(
-                  offer.referrer_bonus_type,
-                  offer.referrer_bonus_value
-                )}
-              </span>
+            
+            <div className="flex items-end gap-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-emerald-700/70 dark:text-emerald-400/70 uppercase tracking-wide mb-0.5">
+                  First Year
+                </span>
+                <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight leading-none">
+                  {formatBonusValue(
+                    offer.referrer_bonus_type,
+                    offer.referrer_bonus_value
+                  )}
+                </span>
+              </div>
+              
+              {offer.onwords_years_bonus_value !== null && offer.onwords_years_bonus_value !== undefined && (
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-emerald-700/70 dark:text-emerald-400/70 uppercase tracking-wide mb-0.5">
+                    Onwards
+                  </span>
+                  <span className="text-2xl font-bold text-emerald-600/80 dark:text-emerald-400/80 tracking-tight leading-none">
+                    {formatBonusValue(
+                      offer.referrer_bonus_type,
+                      offer.onwords_years_bonus_value
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="mt-2 text-xs font-medium text-emerald-800/80 dark:text-emerald-300/80">
+
+            <p className="mt-3 text-xs font-medium text-emerald-800/80 dark:text-emerald-300/80">
                When your friend signs up and places an order
             </p>
           </div>
