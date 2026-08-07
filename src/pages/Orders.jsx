@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
 import { motion } from "framer-motion";
 import {
@@ -141,19 +141,44 @@ function OrderListSkeleton() {
 export default function Orders() {
   const navigate = useNavigate();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialFilter = useMemo(() => {
+    const statusParam = String(searchParams.get("status") || "").trim().toLowerCase();
+    if (!statusParam) return "all";
+    const match = FILTER_TABS.find(
+      (tab) => tab.id === statusParam || tab.status.toLowerCase() === statusParam,
+    );
+    return match?.id || "all";
+  }, [searchParams]);
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [pageNo, setPageNo] = useState(1);
   const [limit, setLimit] = useState(20);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
+    setActiveFilter(initialFilter);
+  }, [initialFilter]);
+
+  useEffect(() => {
     setPageNo(1);
   }, [searchQuery, activeFilter]);
+
+  const handleFilterSelect = (filterId) => {
+    setActiveFilter(filterId);
+    const next = new URLSearchParams(searchParams);
+    if (filterId === "all") {
+      next.delete("status");
+    } else {
+      next.set("status", filterId);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const isFetching = useRef(false);
 
@@ -236,7 +261,7 @@ export default function Orders() {
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveFilter(tab.id)}
+            onClick={() => handleFilterSelect(tab.id)}
             className={`flex-shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all sm:text-sm ${
               activeFilter === tab.id
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-200/60 dark:shadow-none"

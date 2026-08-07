@@ -320,25 +320,14 @@ export const SessionsListSkeleton = () => (
 );
 
 export const HomeDashboardSkeleton = () => (
-  <div className="mx-auto animate-pulse space-y-8">
-    <div className="rounded-3xl border border-border bg-secondary p-6 sm:p-8">
-      <div className="h-4 w-32 rounded-md bg-border" />
-      <div className="mt-4 h-10 w-72 max-w-full rounded-lg bg-border" />
-      <div className="mt-3 h-4 w-96 max-w-full rounded-md bg-border" />
-    </div>
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-32 rounded-2xl bg-border" />
-      ))}
-    </div>
-    <div className="grid gap-6 lg:grid-cols-5">
-      <div className="h-80 rounded-2xl bg-border lg:col-span-3" />
-      <div className="h-80 rounded-2xl bg-border lg:col-span-2" />
-    </div>
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="h-64 rounded-2xl bg-border" />
-      ))}
+  <div className="mx-auto animate-pulse">
+    <div className="grid gap-3 lg:grid-cols-12 lg:items-stretch">
+      <div className="min-h-[12rem] rounded-xl bg-border sm:min-h-[14rem] lg:col-span-5" />
+      <div className="grid grid-cols-2 gap-3 lg:col-span-7">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-28 rounded-2xl bg-border sm:h-32" />
+        ))}
+      </div>
     </div>
   </div>
 );

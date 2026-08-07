@@ -1,44 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { clientRoute } from "../constants/routes";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle,
-  ArrowRight,
   Building2,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
-  CreditCard,
-  FileText,
   FolderOpen,
-  Sparkles,
-  TrendingUp,
-  Wallet,
 } from "lucide-react";
 import { apiCall } from "../utils/apiCall";
-import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { HomeDashboardSkeleton } from "../components/SkeletonComponent";
 
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount ?? 0);
-
-const formatStatusLabel = (status) =>
-  String(status || "Unknown")
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
 };
 
 const itemVariants = {
-  hidden: { y: 18, opacity: 0 },
+  hidden: { y: 16, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
@@ -46,182 +29,263 @@ const itemVariants = {
   },
 };
 
-function ServiceImage({ src, alt, className }) {
-  const [failed, setFailed] = useState(false);
-
-  if (!src || failed) {
-    return (
-      <div
-        className={`flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-400 dark:from-indigo-950 dark:to-slate-800 ${className}`}
-      >
-        <Sparkles size={28} />
-      </div>
-    );
+function resolveCarouselHref(slide) {
+  if (!slide || slide.link_type === "none" || !slide.link_value) return null;
+  if (slide.link_type === "external") return { type: "external", href: slide.link_value };
+  if (slide.link_type === "service") {
+    return { type: "internal", href: clientRoute(`/services/${slide.link_value}`) };
   }
-
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      loading="lazy"
-      onError={() => setFailed(true)}
-    />
-  );
+  if (slide.link_type === "internal") {
+    const map = {
+      home: clientRoute("/home"),
+      services: clientRoute("/services"),
+      orders: clientRoute("/orders"),
+      firms: clientRoute("/firms"),
+      documents: clientRoute("/documents"),
+      account: clientRoute("/profile"),
+    };
+    return map[slide.link_value] ? { type: "internal", href: map[slide.link_value] } : null;
+  }
+  return null;
 }
 
-function StatCard({ icon: Icon, label, value, hint, accent }) {
-  const accents = {
-    indigo:
-      "from-indigo-500/15 to-indigo-500/5 text-indigo-600 border-indigo-200/70 dark:border-indigo-900/50",
-    emerald:
-      "from-emerald-500/15 to-emerald-500/5 text-emerald-600 border-emerald-200/70 dark:border-emerald-900/50",
-    amber:
-      "from-amber-500/15 to-amber-500/5 text-amber-600 border-amber-200/70 dark:border-amber-900/50",
-    violet:
-      "from-violet-500/15 to-violet-500/5 text-violet-600 border-violet-200/70 dark:border-violet-900/50",
+function HomeCarousel({ slides }) {
+  const navigate = useNavigate();
+  const [[index, direction], setPage] = useState([0, 0]);
+  const timerRef = useRef(null);
+
+  const count = slides.length;
+
+  const paginate = useCallback(
+    (newIndex, dir) => {
+      if (!count) return;
+      const next = ((newIndex % count) + count) % count;
+      setPage([next, dir]);
+    },
+    [count],
+  );
+
+  const goTo = useCallback(
+    (next) => {
+      if (!count) return;
+      const normalized = ((next % count) + count) % count;
+      let dir = normalized > index ? 1 : -1;
+      // Wrap around: last -> first is forward, first -> last is backward
+      if (index === count - 1 && normalized === 0) dir = 1;
+      if (index === 0 && normalized === count - 1) dir = -1;
+      paginate(normalized, dir);
+    },
+    [count, index, paginate],
+  );
+
+  useEffect(() => {
+    setPage([0, 0]);
+  }, [slides]);
+
+  useEffect(() => {
+    if (count <= 1) return undefined;
+    timerRef.current = setInterval(() => {
+      setPage(([prev]) => [((prev + 1) % count), 1]);
+    }, 5000);
+    return () => clearInterval(timerRef.current);
+  }, [count, index]);
+
+  if (!count) return null;
+
+  const slide = slides[index];
+  const link = resolveCarouselHref(slide);
+  const clickable = Boolean(link);
+
+  const handleClick = () => {
+    if (!link) return;
+    if (link.type === "external") {
+      window.open(link.href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    navigate(link.href);
+  };
+
+  const slideVariants = {
+    enter: (dir) => ({
+      x: dir >= 0 ? "100%" : "-100%",
+      opacity: 1,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir) => ({
+      x: dir >= 0 ? "-100%" : "100%",
+      opacity: 1,
+    }),
   };
 
   return (
-    <motion.div
-      variants={itemVariants}
-      whileHover={{ y: -4 }}
-      className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 shadow-soft ${accents[accent]}`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/70 dark:bg-slate-900/50">
-          <Icon size={20} />
-        </div>
-        <span className="text-sm font-semibold text-primary-foreground">
-          {label}
-        </span>
+    <motion.div variants={itemVariants} className="h-full min-h-[12rem]">
+      <div className="relative h-full min-h-[12rem] overflow-hidden rounded-xl border border-border bg-secondary shadow-soft sm:min-h-[14rem]">
+        <button
+          type="button"
+          onClick={clickable ? handleClick : undefined}
+          className={`relative block h-full min-h-[12rem] w-full overflow-hidden text-left sm:min-h-[14rem] ${
+            clickable ? "cursor-pointer" : "cursor-default"
+          }`}
+          aria-label={slide.title || "Carousel slide"}
+        >
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.div
+              key={slide.slide_id}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: "tween", duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+              className="absolute inset-0"
+            >
+              <img
+                src={slide.image}
+                alt={slide.title || "Banner"}
+                className="h-full w-full object-cover"
+                draggable={false}
+              />
+              {slide.title ? (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 pb-3 pt-8 sm:px-4">
+                  <p className="line-clamp-1 text-xs font-semibold text-white sm:text-sm">
+                    {slide.title}
+                  </p>
+                </div>
+              ) : null}
+            </motion.div>
+          </AnimatePresence>
+        </button>
+
+        {count > 1 ? (
+          <>
+            <button
+              type="button"
+              onClick={() => goTo(index - 1)}
+              className="absolute left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50 sm:h-8 sm:w-8"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo(index + 1)}
+              className="absolute right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50 sm:h-8 sm:w-8"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1">
+              {slides.map((item, i) => (
+                <button
+                  key={item.slide_id}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  className={`h-1 rounded-full transition ${
+                    i === index ? "w-4 bg-white" : "w-1 bg-white/50"
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
       </div>
-      <p className="mt-4 font-display text-3xl font-bold tracking-tight text-primary-foreground">
-        {value}
-      </p>
-      {hint && <p className="mt-1 text-xs text-secondary-foreground">{hint}</p>}
     </motion.div>
   );
 }
 
-function PendingPaymentCard({ order }) {
-  return (
-    <Link
-      to={clientRoute(`/orders/${order.order_id}`)}
-      className="group flex items-center justify-between gap-4 rounded-xl border border-border bg-primary px-4 py-4 transition hover:border-amber-300 hover:bg-amber-500/5"
-    >
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate text-sm font-semibold text-primary-foreground">
-            {order.name || order.service_name || "Order"}
-          </p>
-          {order.is_partially_paid && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-              Partial
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-xs text-secondary-foreground">
-          {order.service_name} · {formatStatusLabel(order.status)}
-        </p>
-        <p className="mt-1 text-[11px] text-secondary-foreground/80">
-          Due {formatCurrency(order.remaining_amount)}
-          {order.paid_amount > 0
-            ? ` · Paid ${formatCurrency(order.paid_amount)}`
-            : ""}
-        </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2 text-indigo-600 dark:text-indigo-400">
-        <span className="text-xs font-semibold">Pay now</span>
-        <ArrowRight
-          size={16}
-          className="transition group-hover:translate-x-0.5"
-        />
-      </div>
-    </Link>
-  );
-}
-
-function PopularServiceCard({ service, onSelect }) {
-  const hasDiscount = Number(service.discount_value) > 0;
+function StatCard({ icon: Icon, label, value, to, accent, compact = false }) {
+  const accents = {
+    indigo: "from-indigo-500/15 to-indigo-500/5 text-indigo-600 border-indigo-200/70 dark:border-indigo-900/50",
+    emerald:
+      "from-emerald-500/15 to-emerald-500/5 text-emerald-600 border-emerald-200/70 dark:border-emerald-900/50",
+    violet: "from-violet-500/15 to-violet-500/5 text-violet-600 border-violet-200/70 dark:border-violet-900/50",
+    amber: "from-amber-500/15 to-amber-500/5 text-amber-600 border-amber-200/70 dark:border-amber-900/50",
+  };
 
   return (
-    <motion.button
-      type="button"
-      variants={itemVariants}
-      whileHover={{ y: -4 }}
-      onClick={() => onSelect(service.service_id)}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-secondary text-left shadow-soft transition hover:border-indigo-200 hover:shadow-lg"
-    >
-      <div className="relative aspect-[16/10] overflow-hidden">
-        <ServiceImage
-          src={service.image}
-          alt={service.name}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-        />
-        {service.order_count > 0 && (
-          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            {service.order_count} orders
-          </span>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-          {service.type}
-        </span>
-        <h3 className="mt-1 line-clamp-2 text-sm font-bold text-primary-foreground">
-          {service.name}
-        </h3>
-        <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <div>
-            <p className="text-lg font-bold text-primary-foreground">
-              {formatCurrency(service.fees)}
-            </p>
-            {hasDiscount && (
-              <p className="text-xs text-secondary-foreground line-through">
-                {formatCurrency(service.base_price)}
-              </p>
-            )}
+    <motion.div variants={itemVariants} whileHover={{ y: -3 }} className="h-full">
+      <Link
+        to={to}
+        className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-gradient-to-br shadow-soft transition hover:shadow-md ${
+          accents[accent]
+        } ${compact ? "p-3.5 sm:p-4" : "p-5"}`}
+      >
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div
+            className={`flex items-center justify-center rounded-xl bg-white/70 dark:bg-slate-900/50 ${
+              compact ? "h-9 w-9" : "h-11 w-11"
+            }`}
+          >
+            <Icon size={compact ? 16 : 20} />
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-            View
-            <ArrowRight size={14} />
+          <span className={`font-semibold text-primary-foreground ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>
+            {label}
           </span>
         </div>
-      </div>
-    </motion.button>
+        <p
+          className={`mt-3 font-display font-bold tracking-tight text-primary-foreground ${
+            compact ? "text-2xl sm:text-3xl" : "text-3xl"
+          }`}
+        >
+          {value}
+        </p>
+        <span className="mt-2 text-[11px] font-semibold text-primary-foreground/60 transition group-hover:text-indigo-600 dark:group-hover:text-indigo-400 sm:mt-3 sm:text-xs">
+          View details →
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
 export default function Home() {
-  const navigate = useNavigate();
   const toast = useToast();
-  const { user } = useAuth();
-
   const [dashboard, setDashboard] = useState(null);
+  const [carousel, setCarousel] = useState({ enabled: false, slides: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const isFetching = useRef(false);
 
-  const fetchDashboard = useCallback(async () => {
+  const fetchHome = useCallback(async () => {
     if (isFetching.current) return;
     isFetching.current = true;
     setLoading(true);
     setError(null);
 
     try {
-      const response = await apiCall("/report/dashboard");
-      const body = await response.json();
+      const [dashboardRes, carouselRes] = await Promise.all([
+        apiCall("/report/dashboard"),
+        apiCall("/home/carousel").catch(() => null),
+      ]);
+      const dashboardBody = await dashboardRes.json();
 
-      if (response.ok && body.success && body.data) {
-        setDashboard(body.data);
+      if (!dashboardRes.ok || !dashboardBody.success || !dashboardBody.data) {
+        throw new Error(dashboardBody.message || "Failed to load dashboard");
+      }
+
+      setDashboard(dashboardBody.data);
+
+      if (carouselRes) {
+        try {
+          const carouselBody = await carouselRes.json();
+          setCarousel({
+            enabled: Boolean(carouselBody?.data?.enabled),
+            slides: Array.isArray(carouselBody?.data?.slides)
+              ? carouselBody.data.slides
+              : [],
+          });
+        } catch {
+          setCarousel({ enabled: false, slides: [] });
+        }
       } else {
-        throw new Error(body.message || "Failed to load dashboard");
+        setCarousel({ enabled: false, slides: [] });
       }
     } catch (err) {
-      setError(err.message || "Failed to load dashboard.");
-      toast.error("Failed to load dashboard.");
+      setError(err.message || "Failed to load home.");
+      toast.error("Failed to load home.");
     } finally {
       isFetching.current = false;
       setLoading(false);
@@ -229,11 +293,8 @@ export default function Home() {
   }, [toast]);
 
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
-
-  const displayName =
-    dashboard?.user?.first_name || user?.first_name || user?.mobile || "there";
+    fetchHome();
+  }, [fetchHome]);
 
   if (loading) {
     return <HomeDashboardSkeleton />;
@@ -243,10 +304,10 @@ export default function Home() {
     return (
       <div className="mx-auto py-12 text-center">
         <AlertCircle className="mx-auto mb-4 h-10 w-10 text-red-500" />
-        <p className="mb-4 text-red-500">{error || "Dashboard unavailable."}</p>
+        <p className="mb-4 text-red-500">{error || "Home unavailable."}</p>
         <button
           type="button"
-          onClick={fetchDashboard}
+          onClick={fetchHome}
           className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           Retry
@@ -255,11 +316,45 @@ export default function Home() {
     );
   }
 
-  const {
-    statistics,
-    pending_payments: pendingPayments,
-    popular_services: popularServices,
-  } = dashboard;
+  const { statistics } = dashboard;
+  const showCarousel = carousel.enabled && carousel.slides.length > 0;
+
+  const statCards = (
+    <>
+      <StatCard
+        icon={ClipboardList}
+        label="Total orders"
+        value={statistics.total_orders}
+        to={clientRoute("/orders")}
+        accent="indigo"
+        compact={showCarousel}
+      />
+      <StatCard
+        icon={CheckCircle2}
+        label="Completed orders"
+        value={statistics.completed_orders}
+        to={clientRoute("/orders?status=completed")}
+        accent="emerald"
+        compact={showCarousel}
+      />
+      <StatCard
+        icon={Building2}
+        label="Total businesses"
+        value={statistics.businesses_count}
+        to={clientRoute("/firms")}
+        accent="violet"
+        compact={showCarousel}
+      />
+      <StatCard
+        icon={FolderOpen}
+        label="Total documents"
+        value={statistics.documents_count}
+        to={clientRoute("/documents")}
+        accent="amber"
+        compact={showCarousel}
+      />
+    </>
+  );
 
   return (
     <motion.div
@@ -268,252 +363,16 @@ export default function Home() {
       initial="hidden"
       animate="visible"
     >
-      <motion.section
-        variants={itemVariants}
-        className="relative mb-5 overflow-hidden rounded-lg border border-indigo-200/60 bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 p-4 text-white shadow-md dark:border-indigo-900 sm:p-5"
-      >
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-violet-400/20 blur-2xl" />
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-medium text-indigo-100">Welcome back</p>
-            <h1 className="font-display mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
-              Hello, {displayName}
-            </h1>
-            <p className="mt-1.5 text-sm text-indigo-100/90">
-              Manage filings, track payments, and discover services on FinFiler.
-            </p>
+      {showCarousel ? (
+        <div className="grid gap-3 lg:grid-cols-12 lg:items-stretch">
+          <div className="lg:col-span-5">
+            <HomeCarousel slides={carousel.slides} />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              to={clientRoute("/services")}
-              className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-indigo-700 transition hover:bg-indigo-50"
-            >
-              <Sparkles size={15} />
-              Browse services
-            </Link>
-            <Link
-              to={clientRoute("/orders")}
-              className="inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-3 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20"
-            >
-              <ClipboardList size={15} />
-              My orders
-            </Link>
-          </div>
+          <div className="grid grid-cols-2 gap-3 lg:col-span-7">{statCards}</div>
         </div>
-      </motion.section>
-
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          icon={ClipboardList}
-          label="Total orders"
-          value={statistics.total_orders}
-          hint={`${statistics.active_orders} active`}
-          accent="indigo"
-        />
-        <StatCard
-          icon={Wallet}
-          label="Total paid"
-          value={formatCurrency(statistics.total_paid)}
-          hint="Across all orders"
-          accent="emerald"
-        />
-        <StatCard
-          icon={CreditCard}
-          label="Pending payments"
-          value={statistics.pending_payment_count}
-          hint={
-            statistics.pending_payment_amount > 0
-              ? `${formatCurrency(statistics.pending_payment_amount)} due`
-              : "All caught up"
-          }
-          accent="amber"
-        />
-        <StatCard
-          icon={Building2}
-          label="Businesses"
-          value={statistics.businesses_count}
-          hint={`${statistics.documents_count} documents uploaded`}
-          accent="violet"
-        />
-      </div>
-
-      <div className="mb-5 grid gap-4 lg:grid-cols-5">
-        <motion.section
-          variants={itemVariants}
-          className="rounded-2xl border border-border bg-secondary p-5 shadow-soft sm:p-6 lg:col-span-3"
-        >
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                  <CreditCard size={18} />
-                </div>
-                <h2 className="text-lg font-bold text-primary-foreground">
-                  Pending payments
-                </h2>
-              </div>
-              <p className="mt-1 text-sm text-secondary-foreground">
-                Orders waiting for payment to move forward
-              </p>
-            </div>
-            {pendingPayments.length > 0 && (
-              <Link
-                to={clientRoute("/orders")}
-                className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-              >
-                View all
-              </Link>
-            )}
-          </div>
-
-          {pendingPayments.length > 0 ? (
-            <div className="space-y-3">
-              {pendingPayments.map((order) => (
-                <PendingPaymentCard key={order.order_id} order={order} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-border bg-primary/50 px-4 py-10 text-center">
-              <TrendingUp className="mx-auto mb-3 h-8 w-8 text-emerald-500" />
-              <p className="text-sm font-semibold text-primary-foreground">
-                No pending payments
-              </p>
-              <p className="mt-1 text-xs text-secondary-foreground">
-                You&apos;re all set. Explore services to place a new order.
-              </p>
-              <Link
-                to={clientRoute("/services")}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-              >
-                Browse services
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-          )}
-        </motion.section>
-
-        <motion.section
-          variants={itemVariants}
-          className="rounded-2xl border border-border bg-secondary p-5 shadow-soft sm:p-6 lg:col-span-2"
-        >
-          <div className="mb-5 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <TrendingUp size={18} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-primary-foreground">
-                Quick snapshot
-              </h2>
-              <p className="text-xs text-secondary-foreground">
-                Your account at a glance
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                label: "Completed orders",
-                value: statistics.completed_orders,
-                icon: ClipboardList,
-              },
-              {
-                label: "Active orders",
-                value: statistics.active_orders,
-                icon: FileText,
-              },
-              {
-                label: "Documents",
-                value: statistics.documents_count,
-                icon: FolderOpen,
-                link: clientRoute("/documents"),
-              },
-              {
-                label: "Businesses registered",
-                value: statistics.businesses_count,
-                icon: Building2,
-                link: clientRoute("/firms"),
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              const content = (
-                <div className="flex items-center justify-between rounded-xl border border-border bg-primary px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-indigo-600 dark:text-indigo-400">
-                      <Icon size={16} />
-                    </div>
-                    <span className="text-sm font-medium text-primary-foreground">
-                      {item.label}
-                    </span>
-                  </div>
-                  <span className="text-lg font-bold text-primary-foreground">
-                    {item.value}
-                  </span>
-                </div>
-              );
-
-              return item.link ? (
-                <Link
-                  key={item.label}
-                  to={item.link}
-                  className="block transition hover:opacity-90"
-                >
-                  {content}
-                </Link>
-              ) : (
-                <div key={item.label}>{content}</div>
-              );
-            })}
-          </div>
-        </motion.section>
-      </div>
-
-      <motion.section
-        variants={itemVariants}
-        className="rounded-2xl border border-border bg-secondary p-5 shadow-soft sm:p-6"
-      >
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600">
-                <Sparkles size={18} />
-              </div>
-              <h2 className="text-lg font-bold text-primary-foreground">
-                Popular services
-              </h2>
-            </div>
-            <p className="mt-1 text-sm text-secondary-foreground">
-              Most ordered by FinFiler users right now
-            </p>
-          </div>
-          <Link
-            to={clientRoute("/services")}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            View all services
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-
-        {popularServices.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {popularServices.map((service) => (
-              <PopularServiceCard
-                key={service.service_id}
-                service={service}
-                onSelect={(serviceId) => navigate(clientRoute(`/services/${serviceId}`))}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center">
-            <p className="text-sm text-secondary-foreground">
-              No services available yet.
-            </p>
-          </div>
-        )}
-      </motion.section>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{statCards}</div>
+      )}
     </motion.div>
   );
 }

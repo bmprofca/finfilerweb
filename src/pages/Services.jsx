@@ -41,7 +41,7 @@ const itemVariants = {
 function ServiceCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-secondary animate-pulse">
-      <div className="aspect-[4/3] bg-border" />
+      <div className="aspect-[16/9] bg-border" />
       <div className="space-y-3 p-4">
         <div className="h-3 w-16 rounded bg-border" />
         <div className="h-5 w-3/4 rounded bg-border" />
@@ -96,7 +96,7 @@ function ServiceCard({ service, onSelect }) {
       tabIndex={0}
       className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-secondary shadow-soft transition-shadow hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-primary">
+      <div className="relative aspect-[16/9] overflow-hidden bg-primary">
         {hasDiscount && (
           <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-md">
             <Tag size={11} />
